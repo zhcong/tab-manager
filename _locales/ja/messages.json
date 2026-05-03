@@ -3,8 +3,100 @@
     "message": "タブマネージャー",
     "description": "Extension name"
   },
+  "settings": {
+    "message": "設定",
+    "description": "Settings title"
+  },
+  "toggle_collapse": {
+    "message": "折りたたみ切り替え",
+    "description": "Toggle collapse button tooltip"
+  },
   "url_filter_desc": {
     "message": "URLキーワードフィルターを設定 - 条件に一致するタブのみ保存されます",
     "description": "Description for URL filter section"
+  },
+  "include_keywords": {
+    "message": "含むキーワード（一致すると保存）",
+    "description": "Label for include keywords textarea"
+  },
+  "exclude_keywords": {
+    "message": "除外キーワード（一致すると保存しない）",
+    "description": "Label for exclude keywords textarea"
+  },
+  "include_hint": {
+    "message": "空の場合はこのフィルターを無視します",
+    "description": "Hint for include keywords"
+  },
+  "exclude_hint": {
+    "message": "除外は包含より優先されます",
+    "description": "Hint for exclude keywords"
+  },
+  "save": {
+    "message": "保存",
+    "description": "Save button"
+  },
+  "cancel": {
+    "message": "キャンセル",
+    "description": "Cancel button"
+  },
+  "search": {
+    "message": "検索...",
+    "description": "Search placeholder"
+  },
+  "window": {
+    "message": "ウィンドウ",
+    "description": "Window count label"
+  },
+  "window_plural": {
+    "message": "ウィンドウ",
+    "description": "Windows count label plural"
+  },
+  "tab": {
+    "message": "タブ",
+    "description": "Tab count label"
+  },
+  "tab_plural": {
+    "message": "タブ",
+    "description": "Tabs count label plural"
+  },
+  "open_new_page_tip": {
+    "message": "新しいページを開くと自動的に記録されます",
+    "description": "Empty state message"
+  },
+  "closed": {
+    "message": "閉じ済み",
+    "description": "Closed window badge"
+  },
+  "open_all": {
+    "message": "すべて開く",
+    "description": "Open all button"
+  },
+  "clear": {
+    "message": "クリア",
+    "description": "Clear button"
+  },
+  "delete": {
+    "message": "削除",
+    "description": "Delete button"
+  },
+  "just_now": {
+    "message": "たった今",
+    "description": "Time format: just now"
+  },
+  "confirm_clear_all": {
+    "message": "すべての記録を削除してもよろしいですか？",
+    "description": "Confirm dialog for clear all"
+  },
+  "focus_window": {
+    "message": "ウィンドウにフォーカス",
+    "description": "Focus window button tooltip"
+  },
+  "clear_closed": {
+    "message": "閉じたウィンドウをクリア",
+    "description": "Clear closed windows button"
+  },
+  "clear_all": {
+    "message": "すべてクリア",
+    "description": "Clear all button"
   }
 }

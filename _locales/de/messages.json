@@ -3,8 +3,100 @@
     "message": "Tab-Manager",
     "description": "Extension name"
   },
+  "settings": {
+    "message": "Einstellungen",
+    "description": "Settings title"
+  },
+  "toggle_collapse": {
+    "message": "Ein-/Ausblenden",
+    "description": "Toggle collapse button tooltip"
+  },
   "url_filter_desc": {
     "message": "URL-Schlüsselwortfilter festlegen - nur Tabs, die den Kriterien entsprechen, werden gespeichert",
     "description": "Description for URL filter section"
+  },
+  "include_keywords": {
+    "message": "Enthaltene Schlüsselwörter (speichern bei Treffer)",
+    "description": "Label for include keywords textarea"
+  },
+  "exclude_keywords": {
+    "message": "Ausgeschlossene Schlüsselwörter (nicht speichern bei Treffer)",
+    "description": "Label for exclude keywords textarea"
+  },
+  "include_hint": {
+    "message": "Leer lassen, um diesen Filter zu ignorieren",
+    "description": "Hint for include keywords"
+  },
+  "exclude_hint": {
+    "message": "Ausschluss hat Vorrang vor Einschluss",
+    "description": "Hint for exclude keywords"
+  },
+  "save": {
+    "message": "Speichern",
+    "description": "Save button"
+  },
+  "cancel": {
+    "message": "Abbrechen",
+    "description": "Cancel button"
+  },
+  "search": {
+    "message": "Suchen...",
+    "description": "Search placeholder"
+  },
+  "window": {
+    "message": "Fenster",
+    "description": "Window count label"
+  },
+  "window_plural": {
+    "message": "Fenster",
+    "description": "Windows count label plural"
+  },
+  "tab": {
+    "message": "Tab",
+    "description": "Tab count label"
+  },
+  "tab_plural": {
+    "message": "Tabs",
+    "description": "Tabs count label plural"
+  },
+  "open_new_page_tip": {
+    "message": "Neue Seiten öffnen und sie werden automatisch aufgezeichnet",
+    "description": "Empty state message"
+  },
+  "closed": {
+    "message": "Geschlossen",
+    "description": "Closed window badge"
+  },
+  "open_all": {
+    "message": "Alle öffnen",
+    "description": "Open all button"
+  },
+  "clear": {
+    "message": "Löschen",
+    "description": "Clear button"
+  },
+  "delete": {
+    "message": "Löschen",
+    "description": "Delete button"
+  },
+  "just_now": {
+    "message": "Gerade eben",
+    "description": "Time format: just now"
+  },
+  "confirm_clear_all": {
+    "message": "Sind Sie sicher, dass Sie alle Aufzeichnungen löschen möchten?",
+    "description": "Confirm dialog for clear all"
+  },
+  "focus_window": {
+    "message": "Fenster fokussieren",
+    "description": "Focus window button tooltip"
+  },
+  "clear_closed": {
+    "message": "Geschlossene Fenster löschen",
+    "description": "Clear closed windows button"
+  },
+  "clear_all": {
+    "message": "Alle löschen",
+    "description": "Clear all button"
   }
 }

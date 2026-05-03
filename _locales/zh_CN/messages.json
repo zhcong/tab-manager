@@ -3,8 +3,108 @@
     "message": "标签页管家",
     "description": "Extension name"
   },
+  "settings": {
+    "message": "设置",
+    "description": "Settings title"
+  },
+  "toggle_collapse": {
+    "message": "切换折叠状态",
+    "description": "Toggle collapse button tooltip"
+  },
   "url_filter_desc": {
     "message": "设置 URL 关键字过滤，只有符合条件的标签页会被保存",
     "description": "Description for URL filter section"
+  },
+  "include_keywords": {
+    "message": "包含关键字（命中则保存）",
+    "description": "Label for include keywords textarea"
+  },
+  "exclude_keywords": {
+    "message": "排除关键字（命中则不保存）",
+    "description": "Label for exclude keywords textarea"
+  },
+  "include_hint": {
+    "message": "留空则忽略此过滤规则",
+    "description": "Hint for include keywords"
+  },
+  "exclude_hint": {
+    "message": "排除优先于包含",
+    "description": "Hint for exclude keywords"
+  },
+  "save": {
+    "message": "保存",
+    "description": "Save button"
+  },
+  "cancel": {
+    "message": "取消",
+    "description": "Cancel button"
+  },
+  "search": {
+    "message": "搜索...",
+    "description": "Search placeholder"
+  },
+  "window": {
+    "message": "窗口",
+    "description": "Window count label"
+  },
+  "window_plural": {
+    "message": "窗口",
+    "description": "Windows count label plural"
+  },
+  "tab": {
+    "message": "标签页",
+    "description": "Tab count label"
+  },
+  "tab_plural": {
+    "message": "标签页",
+    "description": "Tabs count label plural"
+  },
+  "open_new_page_tip": {
+    "message": "打开新页面后将自动记录",
+    "description": "Empty state message"
+  },
+  "closed": {
+    "message": "已关闭",
+    "description": "Closed window badge"
+  },
+  "open_all": {
+    "message": "打开全部",
+    "description": "Open all button"
+  },
+  "clear": {
+    "message": "清除",
+    "description": "Clear button"
+  },
+  "delete": {
+    "message": "删除",
+    "description": "Delete button"
+  },
+  "just_now": {
+    "message": "刚刚",
+    "description": "Time format: just now"
+  },
+  "confirm_clear_all": {
+    "message": "确定要清除所有记录？",
+    "description": "Confirm dialog for clear all"
+  },
+  "toggle_collapse": {
+    "message": "切换折叠状态",
+    "description": "Toggle collapse button tooltip"
+  },
+  "focus_window": {
+    "message": "定位到该窗口",
+    "description": "Focus window button tooltip"
+  },
+  "clear": {
+    "message": "清除",
+    "description": "Clear button tooltip"
+  },
+  "clear_closed": {
+    "message": "清除关闭窗口",
+    "description": "Clear closed windows button"
+  },
+  "clear_all": {
+    "message": "清除全部",
+    "description": "Clear all button"
   }
 }

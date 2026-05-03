@@ -3,8 +3,100 @@
     "message": "탭 관리자",
     "description": "Extension name"
   },
+  "settings": {
+    "message": "설정",
+    "description": "Settings title"
+  },
+  "toggle_collapse": {
+    "message": "접기/펼치기",
+    "description": "Toggle collapse button tooltip"
+  },
   "url_filter_desc": {
     "message": "URL 키워드 필터 설정 - 기준에 맞는 탭만 저장됩니다",
     "description": "Description for URL filter section"
+  },
+  "include_keywords": {
+    "message": "포함 키워드 (일치하면 저장)",
+    "description": "Label for include keywords textarea"
+  },
+  "exclude_keywords": {
+    "message": "제외 키워드 (일치하면 저장 안함)",
+    "description": "Label for exclude keywords textarea"
+  },
+  "include_hint": {
+    "message": "비워두면 이 필터를 무시합니다",
+    "description": "Hint for include keywords"
+  },
+  "exclude_hint": {
+    "message": "제외가 포함을 우선합니다",
+    "description": "Hint for exclude keywords"
+  },
+  "save": {
+    "message": "저장",
+    "description": "Save button"
+  },
+  "cancel": {
+    "message": "취소",
+    "description": "Cancel button"
+  },
+  "search": {
+    "message": "검색...",
+    "description": "Search placeholder"
+  },
+  "window": {
+    "message": "창",
+    "description": "Window count label"
+  },
+  "window_plural": {
+    "message": "창",
+    "description": "Windows count label plural"
+  },
+  "tab": {
+    "message": "탭",
+    "description": "Tab count label"
+  },
+  "tab_plural": {
+    "message": "탭",
+    "description": "Tabs count label plural"
+  },
+  "open_new_page_tip": {
+    "message": "새 페이지를 열면 자동으로 기록됩니다",
+    "description": "Empty state message"
+  },
+  "closed": {
+    "message": "닫힘",
+    "description": "Closed window badge"
+  },
+  "open_all": {
+    "message": "모두 열기",
+    "description": "Open all button"
+  },
+  "clear": {
+    "message": "지우기",
+    "description": "Clear button"
+  },
+  "delete": {
+    "message": "삭제",
+    "description": "Delete button"
+  },
+  "just_now": {
+    "message": "방금",
+    "description": "Time format: just now"
+  },
+  "confirm_clear_all": {
+    "message": "모든 기록을 삭제하시겠습니까?",
+    "description": "Confirm dialog for clear all"
+  },
+  "focus_window": {
+    "message": "창으로 이동",
+    "description": "Focus window button tooltip"
+  },
+  "clear_closed": {
+    "message": "닫힌 창 지우기",
+    "description": "Clear closed windows button"
+  },
+  "clear_all": {
+    "message": "모두 지우기",
+    "description": "Clear all button"
   }
 }

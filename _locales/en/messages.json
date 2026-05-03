@@ -3,8 +3,108 @@
     "message": "Tab Manager",
     "description": "Extension name"
   },
+  "settings": {
+    "message": "Settings",
+    "description": "Settings title"
+  },
+  "toggle_collapse": {
+    "message": "Toggle collapse",
+    "description": "Toggle collapse button tooltip"
+  },
   "url_filter_desc": {
     "message": "Set URL keyword filters - only tabs matching the criteria will be saved",
     "description": "Description for URL filter section"
+  },
+  "include_keywords": {
+    "message": "Include Keywords (save if matched)",
+    "description": "Label for include keywords textarea"
+  },
+  "exclude_keywords": {
+    "message": "Exclude Keywords (do not save if matched)",
+    "description": "Label for exclude keywords textarea"
+  },
+  "include_hint": {
+    "message": "Leave empty to ignore this filter",
+    "description": "Hint for include keywords"
+  },
+  "exclude_hint": {
+    "message": "Exclusion takes priority over inclusion",
+    "description": "Hint for exclude keywords"
+  },
+  "save": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "search": {
+    "message": "Search...",
+    "description": "Search placeholder"
+  },
+  "window": {
+    "message": "window",
+    "description": "Window count label"
+  },
+  "window_plural": {
+    "message": "windows",
+    "description": "Windows count label plural"
+  },
+  "tab": {
+    "message": "tab",
+    "description": "Tab count label"
+  },
+  "tab_plural": {
+    "message": "tabs",
+    "description": "Tabs count label plural"
+  },
+  "open_new_page_tip": {
+    "message": "Open new pages and they will be recorded automatically",
+    "description": "Empty state message"
+  },
+  "closed": {
+    "message": "Closed",
+    "description": "Closed window badge"
+  },
+  "open_all": {
+    "message": "Open All",
+    "description": "Open all button"
+  },
+  "clear": {
+    "message": "Clear",
+    "description": "Clear button"
+  },
+  "delete": {
+    "message": "Delete",
+    "description": "Delete button"
+  },
+  "just_now": {
+    "message": "Just now",
+    "description": "Time format: just now"
+  },
+  "confirm_clear_all": {
+    "message": "Are you sure you want to clear all records?",
+    "description": "Confirm dialog for clear all"
+  },
+  "toggle_collapse": {
+    "message": "Toggle collapse",
+    "description": "Toggle collapse button tooltip"
+  },
+  "focus_window": {
+    "message": "Focus window",
+    "description": "Focus window button tooltip"
+  },
+  "clear": {
+    "message": "Clear",
+    "description": "Clear button tooltip"
+  },
+  "clear_closed": {
+    "message": "Clear closed windows",
+    "description": "Clear closed windows button"
+  },
+  "clear_all": {
+    "message": "Clear all",
+    "description": "Clear all button"
   }
 }
