@@ -6,8 +6,8 @@
 
 **自动记录浏览器打开的标签页，关闭后可一键重新打开。**
 
-![Tab Manager](./images/screenshot-1.png)
-![Tab Manager](./images/screenshot-2.png)
+<img src="./images/screenshot-1.png" width="400">
+<img src="./images/screenshot-2.png" width="400">
 
 ## 功能特点
 

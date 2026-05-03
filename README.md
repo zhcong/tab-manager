@@ -6,8 +6,8 @@
 
 **Automatically record opened tabs, restore them with one click after closing.**
 
-![Tab Manager](./images/screenshot-1.png)
-![Tab Manager](./images/screenshot-2.png)
+<img src="./images/screenshot-1.png" width="400">
+<img src="./images/screenshot-2.png" width="400">
 
 ## Features
 
