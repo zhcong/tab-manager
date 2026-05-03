@@ -1,0 +1,10 @@
+{
+  "extension_name": {
+    "message": "Tab-Manager",
+    "description": "Extension name"
+  },
+  "url_filter_desc": {
+    "message": "URL-Schlüsselwortfilter festlegen - nur Tabs, die den Kriterien entsprechen, werden gespeichert",
+    "description": "Description for URL filter section"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extension_name": {
+    "message": "탭 관리자",
+    "description": "Extension name"
+  },
+  "url_filter_desc": {
+    "message": "URL 키워드 필터 설정 - 기준에 맞는 탭만 저장됩니다",
+    "description": "Description for URL filter section"
+  }
+}

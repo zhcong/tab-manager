@@ -1,0 +1,10 @@
+{
+  "extension_name": {
+    "message": "タブマネージャー",
+    "description": "Extension name"
+  },
+  "url_filter_desc": {
+    "message": "URLキーワードフィルターを設定 - 条件に一致するタブのみ保存されます",
+    "description": "Description for URL filter section"
+  }
+}

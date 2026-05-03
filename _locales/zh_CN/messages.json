@@ -1,0 +1,10 @@
+{
+  "extension_name": {
+    "message": "标签页管家",
+    "description": "Extension name"
+  },
+  "url_filter_desc": {
+    "message": "设置 URL 关键字过滤，只有符合条件的标签页会被保存",
+    "description": "Description for URL filter section"
+  }
+}

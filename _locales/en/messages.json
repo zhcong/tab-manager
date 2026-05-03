@@ -1,0 +1,10 @@
+{
+  "extension_name": {
+    "message": "Tab Manager",
+    "description": "Extension name"
+  },
+  "url_filter_desc": {
+    "message": "Set URL keyword filters - only tabs matching the criteria will be saved",
+    "description": "Description for URL filter section"
+  }
+}
