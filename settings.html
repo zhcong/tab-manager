@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TabFlow</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+    </div>
+
+    <div class="section">
+      <p class="desc" data-i18n="url_filter_desc">设置 URL 关键字过滤，只有符合条件的标签页会被保存</p>
+
+      <div class="field">
+        <label for="include" data-i18n="include_keywords">包含关键字（命中则保存）</label>
+        <textarea id="include" placeholder="每行一个关键字，例如：&#10;github&#10;gitlab"></textarea>
+        <span class="hint" data-i18n="include_hint">留空则忽略此过滤规则</span>
+      </div>
+
+      <div class="field">
+        <label for="exclude" data-i18n="exclude_keywords">排除关键字（命中则不保存）</label>
+        <textarea id="exclude" placeholder="每行一个关键字，例如：&#10;facebook&#10;twitter"></textarea>
+        <span class="hint" data-i18n="exclude_hint">排除优先于包含</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button id="saveBtn" class="btn-primary" data-i18n="save">保存</button>
+      <button id="cancelBtn" class="btn-secondary" data-i18n="cancel">取消</button>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
