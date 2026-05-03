@@ -102,17 +102,19 @@ body {
   margin-bottom: 16px;
 }
 
-.desc.github-link {
+.github-link {
   text-align: center;
-  margin-bottom: 12px;
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 12px;
 }
 
-.desc.github-link a {
+.github-link a {
   color: var(--accent);
   text-decoration: none;
 }
 
-.desc.github-link a:hover {
+.github-link a:hover {
   text-decoration: underline;
 }
 
