@@ -63,12 +63,12 @@ clearAllBtn.addEventListener('click', async () => {
 });
 
 async function load() {
-  applyI18n();
   const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
   render();
+  applyI18n();
 }
 
 function applyI18n() {
@@ -128,7 +128,7 @@ function render() {
           <rect x="2" y="3" width="20" height="14" rx="2"/>
           <path d="M8 21h8M12 17v4"/>
         </svg>
-        <p>打开新页面后将自动记录</p>
+        <p data-i18n="open_new_page_tip">打开新页面后将自动记录</p>
       </div>
     `;
     return;
@@ -145,14 +145,14 @@ function render() {
     const label = windowNames[String(g.key)] || defaultLabel;
     const itemsHtml = g.records.map(r => renderItem(r)).join('');
     const focusBtn = (!isClosed && hasValidWindow)
-      ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window" title="Focus window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
+      ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
       : '';
 
     const openAllBtn = isClosed
-      ? `<button class="open-all-btn" data-i18n="open_all">Open All</button>`
+      ? `<button class="open-all-btn" data-i18n="open_all">${chrome.i18n.getMessage('open_all') || 'Open All'}</button>`
       : '';
     const closeWinBtn = (isClosed && hasValidWindow)
-      ? `<button class="close-win-btn" data-wid="${g.key}" data-i18n-title="clear" title="Clear"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`
+      ? `<button class="close-win-btn" data-wid="${g.key}" data-i18n-title="clear"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`
       : '';
 
     const closedMsg = chrome.i18n.getMessage('closed') || '已关闭';
@@ -160,7 +160,7 @@ function render() {
     return `
       <div class="group expanded" data-key="${g.key}">
         <div class="group-header">
-          <span class="chevron" data-i18n-title="toggle_collapse" title="Toggle">
+          <span class="chevron" data-i18n-title="toggle_collapse">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l10 7-10 7"/></svg>
           </span>
           <span class="window-indicator"></span>
@@ -370,7 +370,7 @@ function renderItem(r) {
         <div class="url"><span class="text-inner">${escapeHtml(r.url)}</span></div>
       </div>
       <span class="time">${timeStr}</span>
-      <button class="delete-btn" data-id="${escapeHtml(r.id)}" title="删除">
+      <button class="delete-btn" data-id="${escapeHtml(r.id)}" data-i18n-title="delete">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
