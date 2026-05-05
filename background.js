@@ -115,7 +115,7 @@ chrome.runtime.onStartup.addListener(async () => {
 // --- 标签页事件 ---
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (!tab.url || tab.url.startsWith('chrome://')) return;
+  if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return;
   if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
     trackTab(tabId, tab.windowId);
     upsertRecord(`tab-${tabId}`, {
