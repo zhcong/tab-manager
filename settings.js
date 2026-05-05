@@ -1,5 +1,6 @@
 const includeEl = document.getElementById('include');
 const excludeEl = document.getElementById('exclude');
+const openInWindowEl = document.getElementById('openInWindow');
 const saveBtn = document.getElementById('saveBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 
@@ -18,11 +19,12 @@ function applyI18n() {
 
 async function load() {
   applyI18n();
-  const result = await chrome.storage.local.get(['urlIncludeKeywords', 'urlExcludeKeywords']);
+  const result = await chrome.storage.local.get(['urlIncludeKeywords', 'urlExcludeKeywords', 'openInWindow']);
   const include = result.urlIncludeKeywords || [];
   const exclude = result.urlExcludeKeywords || [];
   includeEl.value = include.join('\n');
   excludeEl.value = exclude.join('\n');
+  openInWindowEl.checked = result.openInWindow || false;
 }
 
 function parseKeywords(text) {
@@ -34,7 +36,11 @@ function parseKeywords(text) {
 saveBtn.addEventListener('click', async () => {
   const include = parseKeywords(includeEl.value);
   const exclude = parseKeywords(excludeEl.value);
-  await chrome.storage.local.set({ urlIncludeKeywords: include, urlExcludeKeywords: exclude });
+  await chrome.storage.local.set({
+    urlIncludeKeywords: include,
+    urlExcludeKeywords: exclude,
+    openInWindow: openInWindowEl.checked
+  });
   window.close();
 });
 
