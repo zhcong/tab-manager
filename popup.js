@@ -63,27 +63,32 @@ clearAllBtn.addEventListener('click', async () => {
 });
 
 async function load() {
-  // 检测是否需要在独立窗口中打开
-  const settings = await chrome.storage.local.get(['openInWindow']);
-  if (settings.openInWindow) {
-    try {
-      const displays = await chrome.system.display.getInfo();
-      const primary = displays.find(d => d.isPrimary) || displays[0];
-      const width = Math.min(Math.floor(primary.workArea.width * 0.6), 800);
-      const height = Math.min(Math.floor(primary.workArea.height * 0.7), 900);
-      await chrome.windows.create({
-        url: 'popup.html',
-        width,
-        height,
-        focused: true,
-        left: Math.floor(primary.workArea.left + (primary.workArea.width - width) / 2),
-        top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2)
-      });
-    } catch (e) {
-      console.error('Failed to create window:', e);
+  // 检测是否需要在独立窗口中打开（但如果是已经创建的窗口则跳过）
+  const urlParams = new URLSearchParams(window.location.search);
+  const isWindowMode = urlParams.get('windowMode') === 'true';
+
+  if (!isWindowMode) {
+    const settings = await chrome.storage.local.get(['openInWindow']);
+    if (settings.openInWindow) {
+      try {
+        const displays = await chrome.system.display.getInfo();
+        const primary = displays.find(d => d.isPrimary) || displays[0];
+        const width = Math.min(Math.floor(primary.workArea.width * 0.6), 800);
+        const height = Math.min(Math.floor(primary.workArea.height * 0.7), 900);
+        await chrome.windows.create({
+          url: 'popup.html?windowMode=true',
+          width,
+          height,
+          focused: true,
+          left: Math.floor(primary.workArea.left + (primary.workArea.width - width) / 2),
+          top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2)
+        });
+      } catch (e) {
+        console.error('Failed to create window:', e);
+      }
+      window.close();
+      return;
     }
-    window.close();
-    return;
   }
 
   // 原有的加载逻辑
