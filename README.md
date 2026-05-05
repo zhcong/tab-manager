@@ -30,6 +30,10 @@
 - Rename window groups with custom labels
 - Clear closed window records individually
 - Delete specific tab records
+- Open history in an independent window (enable in settings)
+
+### Independent Window Mode
+Enable "Open in Independent Window" in settings to display your tab history in a dedicated popup window instead of the browser's default popup. The window size automatically adjusts to your screen.
 
 ### Multi-language Support
 - Supports: English, Chinese, Korean, Japanese, German
