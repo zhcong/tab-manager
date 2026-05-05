@@ -81,7 +81,8 @@ async function load() {
           height,
           focused: true,
           left: Math.floor(primary.workArea.left + (primary.workArea.width - width) / 2),
-          top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2)
+          top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2),
+          type: 'popup'
         });
       } catch (e) {
         console.error('Failed to create window:', e);
@@ -92,6 +93,10 @@ async function load() {
   }
 
   // 原有的加载逻辑
+  if (isWindowMode) {
+    document.body.classList.add('window-mode');
+  }
+
   const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};

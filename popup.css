@@ -63,6 +63,17 @@ body {
   border-radius: 20px;
 }
 
+body.window-mode {
+  width: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+
+body.window-mode .list {
+  flex: 1;
+  overflow-y: auto;
+}
+
 /* --- Toolbar --- */
 .toolbar {
   display: flex;
