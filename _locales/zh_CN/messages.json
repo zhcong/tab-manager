@@ -35,6 +35,14 @@
     "message": "保存",
     "description": "Save button"
   },
+  "open_in_window": {
+    "message": "在独立窗口中打开",
+    "description": "Toggle label for open in window mode"
+  },
+  "open_in_window_desc": {
+    "message": "开启后，点击扩展图标会在独立窗口显示历史记录",
+    "description": "Description for open in window setting"
+  },
   "cancel": {
     "message": "取消",
     "description": "Cancel button"
