@@ -68,14 +68,29 @@ async function load() {
   const isWindowMode = urlParams.get('windowMode') === 'true';
 
   if (!isWindowMode) {
-    const settings = await chrome.storage.local.get(['openInWindow']);
+    const settings = await chrome.storage.local.get(['openInWindow', 'windowModeWindowId']);
     if (settings.openInWindow) {
       try {
+        // 检查之前创建的窗口是否还存在
+        if (settings.windowModeWindowId) {
+          try {
+            const existingWindow = await chrome.windows.get(settings.windowModeWindowId);
+            if (existingWindow) {
+              // 窗口存在，直接聚焦
+              await chrome.windows.update(settings.windowModeWindowId, { focused: true });
+              window.close();
+              return;
+            }
+          } catch (e) {
+            // 窗口不存在，继续创建新的
+          }
+        }
+
         const displays = await chrome.system.display.getInfo();
         const primary = displays.find(d => d.isPrimary) || displays[0];
         const width = Math.min(Math.floor(primary.workArea.width * 0.6), 800);
         const height = Math.min(Math.floor(primary.workArea.height * 0.7), 900);
-        await chrome.windows.create({
+        const newWindow = await chrome.windows.create({
           url: 'popup.html?windowMode=true',
           width,
           height,
@@ -84,6 +99,8 @@ async function load() {
           top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2),
           type: 'popup'
         });
+        // 保存窗口 ID 以便后续聚焦
+        await chrome.storage.local.set({ windowModeWindowId: newWindow.id });
       } catch (e) {
         console.error('Failed to create window:', e);
       }
