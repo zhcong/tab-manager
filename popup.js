@@ -63,6 +63,30 @@ clearAllBtn.addEventListener('click', async () => {
 });
 
 async function load() {
+  // 检测是否需要在独立窗口中打开
+  const settings = await chrome.storage.local.get(['openInWindow']);
+  if (settings.openInWindow) {
+    try {
+      const displays = await chrome.system.display.getInfo();
+      const primary = displays.find(d => d.isPrimary) || displays[0];
+      const width = Math.min(Math.floor(primary.workArea.width * 0.6), 800);
+      const height = Math.min(Math.floor(primary.workArea.height * 0.7), 900);
+      await chrome.windows.create({
+        url: 'popup.html',
+        width,
+        height,
+        focused: true,
+        left: Math.floor(primary.workArea.left + (primary.workArea.width - width) / 2),
+        top: Math.floor(primary.workArea.top + (primary.workArea.height - height) / 2)
+      });
+    } catch (e) {
+      console.error('Failed to create window:', e);
+    }
+    window.close();
+    return;
+  }
+
+  // 原有的加载逻辑
   const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
