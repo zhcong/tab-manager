@@ -159,7 +159,7 @@ function scheduleRefresh() {
 }
 
 async function smartRefresh() {
-  if (document.querySelector('.label-input')) {
+  if (document.querySelector('.label-input') || document.querySelector('.color-row')) {
     pendingRefresh = true;
     return;
   }
@@ -559,6 +559,10 @@ function render() {
 
       if (existingRow) {
         existingRow.remove();
+        if (pendingRefresh) {
+          pendingRefresh = false;
+          scheduleRefresh();
+        }
         return;
       }
 
@@ -585,6 +589,10 @@ function render() {
         await chrome.storage.local.set({ windowColors });
         dot.style.backgroundColor = color;
         colorRow.remove();
+        if (pendingRefresh) {
+          pendingRefresh = false;
+          scheduleRefresh();
+        }
       });
 
       const header = group.querySelector('.group-header');
