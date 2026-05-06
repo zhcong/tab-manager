@@ -12,6 +12,9 @@ let allRecords = [];
 let windowNames = {};
 let closedWindowIds = [];
 let isExpanded = true;
+let debounceTimer = null;
+let pendingRefresh = false;
+let isWindowMode = false;
 
 searchEl.addEventListener('input', render);
 
@@ -65,7 +68,7 @@ clearAllBtn.addEventListener('click', async () => {
 async function load() {
   // 检测是否需要在独立窗口中打开（但如果是已经创建的窗口则跳过）
   const urlParams = new URLSearchParams(window.location.search);
-  const isWindowMode = urlParams.get('windowMode') === 'true';
+  isWindowMode = urlParams.get('windowMode') === 'true';
 
   if (!isWindowMode) {
     const settings = await chrome.storage.local.get(['openInWindow', 'windowModeWindowId']);
@@ -120,6 +123,56 @@ async function load() {
   closedWindowIds = result.closedWindowIds || [];
   render();
   applyI18n();
+
+  if (isWindowMode) {
+    chrome.storage.onChanged.addListener(handleStorageChange);
+  }
+}
+
+function handleStorageChange(changes, namespace) {
+  if (namespace !== 'local') return;
+  if (changes.tabHistory || changes.closedWindowIds || changes.windowNames) {
+    scheduleRefresh();
+  }
+}
+
+function scheduleRefresh() {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(async () => {
+    debounceTimer = null;
+    await smartRefresh();
+  }, 300);
+}
+
+async function smartRefresh() {
+  if (document.querySelector('.label-input')) {
+    pendingRefresh = true;
+    return;
+  }
+
+  const searchText = searchEl.value;
+  const expandedStates = new Map();
+  document.querySelectorAll('.group').forEach(g => {
+    expandedStates.set(g.dataset.key, g.classList.contains('expanded'));
+  });
+
+  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
+  allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
+  windowNames = result.windowNames || {};
+  closedWindowIds = result.closedWindowIds || [];
+
+  if (searchText) {
+    searchEl.value = searchText;
+  }
+  render();
+
+  document.querySelectorAll('.group').forEach(g => {
+    if (expandedStates.get(g.dataset.key) === false) {
+      g.classList.remove('expanded');
+    }
+  });
+
+  pendingRefresh = false;
 }
 
 function applyI18n() {
@@ -298,6 +351,10 @@ function render() {
         labelEl.textContent = name;
         labelEl.style.display = '';
         input.remove();
+        if (pendingRefresh) {
+          pendingRefresh = false;
+          scheduleRefresh();
+        }
       };
 
       input.addEventListener('blur', finish);
