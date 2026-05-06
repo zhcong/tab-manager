@@ -15,6 +15,8 @@ let isExpanded = true;
 let debounceTimer = null;
 let pendingRefresh = false;
 let isWindowMode = false;
+let windowOrder = [];
+let windowColors = {};
 
 searchEl.addEventListener('input', render);
 
@@ -47,9 +49,17 @@ clearClosedBtn.addEventListener('click', async () => {
 
   // 删除属于已关闭窗口的记录
   const filtered = history.filter(r => !closedIds.includes(r.windowId));
-  await chrome.storage.local.set({ tabHistory: filtered, closedWindowIds: [] });
+  const removedIds = new Set(closedIds);
+  const newOrder = windowOrder.filter(id => !removedIds.has(id));
+  const newColors = {};
+  for (const [key, val] of Object.entries(windowColors)) {
+    if (!removedIds.has(Number(key))) newColors[key] = val;
+  }
+  await chrome.storage.local.set({ tabHistory: filtered, closedWindowIds: [], windowOrder: newOrder, windowColors: newColors });
   allRecords = filtered.sort((a, b) => b.openedAt - a.openedAt);
   closedWindowIds = [];
+  windowOrder = newOrder;
+  windowColors = newColors;
   render();
 });
 
@@ -57,10 +67,12 @@ clearClosedBtn.addEventListener('click', async () => {
 clearAllBtn.addEventListener('click', async () => {
   const confirmMsg = chrome.i18n.getMessage('confirm_clear_all');
   if (confirm(confirmMsg)) {
-    await chrome.storage.local.set({ tabHistory: [], windowNames: {}, closedWindowIds: [] });
+    await chrome.storage.local.set({ tabHistory: [], windowNames: {}, closedWindowIds: [], windowOrder: [], windowColors: {} });
     allRecords = [];
     windowNames = {};
     closedWindowIds = [];
+    windowOrder = [];
+    windowColors = {};
     render();
   }
 });
@@ -117,10 +129,12 @@ async function load() {
     document.body.classList.add('window-mode');
   }
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
+  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
+  windowOrder = result.windowOrder || [];
+  windowColors = result.windowColors || {};
   render();
   applyI18n();
 
@@ -156,10 +170,12 @@ async function smartRefresh() {
     expandedStates.set(g.dataset.key, g.classList.contains('expanded'));
   });
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds']);
+  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
+  windowOrder = result.windowOrder || [];
+  windowColors = result.windowColors || {};
 
   if (searchText) {
     searchEl.value = searchText;
@@ -220,6 +236,13 @@ function render() {
     groups.get(wid).push(r);
   });
 
+  // 清理过期的 windowOrder 和 windowColors
+  const existingKeys = new Set([...groups.keys()].map(String));
+  windowOrder = windowOrder.filter(id => existingKeys.has(String(id)));
+  windowColors = Object.fromEntries(
+    Object.entries(windowColors).filter(([key]) => existingKeys.has(key))
+  );
+
   countEl.textContent = filtered.length;
   const winMsg = chrome.i18n.getMessage('window');
   const winPluralMsg = chrome.i18n.getMessage('window_plural');
@@ -238,9 +261,7 @@ function render() {
     return;
   }
 
-  const sortedGroups = [...groups.entries()]
-    .map(([key, records]) => ({ key, records }))
-    .sort((a, b) => b.records[0].openedAt - a.records[0].openedAt);
+  const sortedGroups = getSortedGroups(groups);
 
   listEl.innerHTML = sortedGroups.map(g => {
     const isClosed = closedWindowIds.includes(Number(g.key));
@@ -264,10 +285,13 @@ function render() {
     return `
       <div class="group expanded" data-key="${g.key}">
         <div class="group-header">
+          <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+          </span>
           <span class="chevron" data-i18n-title="toggle_collapse">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l10 7-10 7"/></svg>
           </span>
-          <span class="window-indicator"></span>
+          <span class="window-indicator" style="${windowColors[String(g.key)] ? 'background-color:' + windowColors[String(g.key)] : ''}"></span>
           <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}">${escapeHtml(label)}</span>
           ${isClosed ? `<span class="closed-win-badge">${closedMsg}</span>` : ''}
           <span class="window-count">${g.records.length}</span>
@@ -283,7 +307,7 @@ function render() {
   // 组折叠
   listEl.querySelectorAll('.group-header').forEach(header => {
     header.addEventListener('click', (e) => {
-      if (e.target.closest('.open-all-btn') || e.target.closest('.focus-win-btn') || e.target.closest('.window-label') || e.target.closest('.label-input')) return;
+      if (e.target.closest('.open-all-btn') || e.target.closest('.focus-win-btn') || e.target.closest('.window-label') || e.target.closest('.label-input') || e.target.closest('.drag-handle') || e.target.closest('.window-indicator')) return;
       header.parentElement.classList.toggle('expanded');
     });
   });
@@ -304,9 +328,14 @@ function render() {
       const result = await chrome.storage.local.get(['tabHistory', 'closedWindowIds']);
       const history = (result.tabHistory || []).filter(r => r.windowId !== wid);
       const closedIds = (result.closedWindowIds || []).filter(id => id !== wid);
-      await chrome.storage.local.set({ tabHistory: history, closedWindowIds: closedIds });
+      const newOrder = windowOrder.filter(id => id !== wid);
+      const newColors = { ...windowColors };
+      delete newColors[String(wid)];
+      await chrome.storage.local.set({ tabHistory: history, closedWindowIds: closedIds, windowOrder: newOrder, windowColors: newColors });
       allRecords = history.sort((a, b) => b.openedAt - a.openedAt);
       closedWindowIds = closedIds;
+      windowOrder = newOrder;
+      windowColors = newColors;
       render();
     });
   });
@@ -326,10 +355,15 @@ function render() {
       const result = await chrome.storage.local.get(['tabHistory', 'closedWindowIds']);
       const history = (result.tabHistory || []).filter(r => r.windowId !== oldWindowId);
       const closedIds = (result.closedWindowIds || []).filter(id => id !== oldWindowId);
-      await chrome.storage.local.set({ tabHistory: history, closedWindowIds: closedIds });
+      const newOrder = windowOrder.filter(id => id !== oldWindowId);
+      const newColors = { ...windowColors };
+      delete newColors[String(oldWindowId)];
+      await chrome.storage.local.set({ tabHistory: history, closedWindowIds: closedIds, windowOrder: newOrder, windowColors: newColors });
 
       allRecords = history.sort((a, b) => b.openedAt - a.openedAt);
       closedWindowIds = closedIds;
+      windowOrder = newOrder;
+      windowColors = newColors;
       render();
     });
   });
@@ -459,6 +493,119 @@ function render() {
       deleteRecord(btn.dataset.id);
     });
   });
+
+  // 拖拽排序
+  listEl.querySelectorAll('.drag-handle').forEach(handle => {
+    handle.addEventListener('dragstart', (e) => {
+      const group = handle.closest('.group');
+      group.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', group.dataset.key);
+    });
+    handle.addEventListener('dragend', () => {
+      document.querySelectorAll('.group.dragging').forEach(g => g.classList.remove('dragging'));
+      document.querySelectorAll('.group.drag-over').forEach(g => g.classList.remove('drag-over'));
+    });
+  });
+
+  listEl.querySelectorAll('.group').forEach(group => {
+    group.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const dragging = document.querySelector('.group.dragging');
+      if (!dragging || dragging === group) return;
+      group.classList.add('drag-over');
+    });
+    group.addEventListener('dragleave', () => {
+      group.classList.remove('drag-over');
+    });
+    group.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      group.classList.remove('drag-over');
+      const dragging = document.querySelector('.group.dragging');
+      if (!dragging || dragging === group) return;
+
+      const draggedKey = Number(dragging.dataset.key);
+      const targetKey = Number(group.dataset.key);
+
+      const allKeys = [...document.querySelectorAll('.group')].map(g => Number(g.dataset.key));
+      if (windowOrder.length === 0) {
+        windowOrder = [...allKeys];
+      }
+      if (!windowOrder.includes(draggedKey)) windowOrder.push(draggedKey);
+      if (!windowOrder.includes(targetKey)) windowOrder.push(targetKey);
+
+      const draggedIdx = windowOrder.indexOf(draggedKey);
+      const targetIdx = windowOrder.indexOf(targetKey);
+      windowOrder.splice(draggedIdx, 1);
+      windowOrder.splice(targetIdx, 0, draggedKey);
+
+      await chrome.storage.local.set({ windowOrder });
+      render();
+    });
+  });
+
+  // 小圆点颜色选择
+  listEl.querySelectorAll('.window-indicator').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = dot.closest('.group');
+      const groupKey = group.dataset.key;
+      const existingRow = group.querySelector('.color-row');
+
+      document.querySelectorAll('.color-row').forEach(r => {
+        if (r !== existingRow) r.remove();
+      });
+
+      if (existingRow) {
+        existingRow.remove();
+        return;
+      }
+
+      const presetColors = [
+        '#6366f1', '#8b5cf6', '#06b6d4', '#10b981',
+        '#f59e0b', '#ef4444', '#ec4899', '#f97316',
+        '#84cc16', '#14b8a6', '#3b82f6', '#a855f7'
+      ];
+      const currentColor = windowColors[String(groupKey)];
+
+      const colorRow = document.createElement('div');
+      colorRow.className = 'color-row';
+      colorRow.innerHTML = presetColors.map(c =>
+        `<span class="color-dot${c === currentColor ? ' selected' : ''}"
+              style="background:${c}; color:${c}"
+              data-color="${c}"></span>`
+      ).join('');
+
+      colorRow.addEventListener('click', async (ev) => {
+        const colorDot = ev.target.closest('.color-dot');
+        if (!colorDot) return;
+        const color = colorDot.dataset.color;
+        windowColors[String(groupKey)] = color;
+        await chrome.storage.local.set({ windowColors });
+        dot.style.backgroundColor = color;
+        colorRow.remove();
+      });
+
+      const header = group.querySelector('.group-header');
+      header.after(colorRow);
+    });
+  });
+}
+
+function getSortedGroups(groups) {
+  const entries = [...groups.entries()].map(([key, records]) => ({ key, records }));
+  if (windowOrder.length === 0) {
+    return entries.sort((a, b) => b.records[0].openedAt - a.records[0].openedAt);
+  }
+  const orderMap = new Map(windowOrder.map((id, i) => [Number(id), i]));
+  entries.sort((a, b) => {
+    const ai = orderMap.has(Number(a.key)) ? orderMap.get(Number(a.key)) : Infinity;
+    const bi = orderMap.has(Number(b.key)) ? orderMap.get(Number(b.key)) : Infinity;
+    if (ai !== bi) return ai - bi;
+    return b.records[0].openedAt - a.records[0].openedAt;
+  });
+  return entries;
 }
 
 function renderItem(r) {

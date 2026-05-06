@@ -541,3 +541,63 @@ body.window-mode .list {
   background: var(--danger-hover);
   border-color: var(--danger);
 }
+
+/* Drag handle */
+.drag-handle {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+  color: var(--text3);
+  border-radius: 4px;
+}
+
+.group-header:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:hover {
+  background: var(--input-bg);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.group.dragging {
+  opacity: 0.4;
+}
+
+.group.drag-over {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+
+/* Color picker row */
+.color-row {
+  display: flex;
+  gap: 6px;
+  padding: 4px 14px 8px 52px;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+}
+
+.color-dot.selected {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px currentColor;
+}
