@@ -98,5 +98,21 @@
   "clear_all": {
     "message": "すべてクリア",
     "description": "Clear all button"
+  },
+  "new_window": {
+    "message": "新規グループ",
+    "description": "New window button tooltip"
+  },
+  "new_window_dialog_title": {
+    "message": "新規グループ",
+    "description": "New window dialog title"
+  },
+  "new_group_placeholder": {
+    "message": "グループ名",
+    "description": "Group name input placeholder"
+  },
+  "confirm": {
+    "message": "確認",
+    "description": "Confirm button"
   }
 }

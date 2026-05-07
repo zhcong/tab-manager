@@ -8,6 +8,8 @@
 
 <img src="./images/screenshot-1.png" width="400">
 <img src="./images/screenshot-2.png" width="400">
+<img src="./images/screenshot-3.png" width="400">
+<img src="./images/screenshot-4.png" width="400">
 
 ## 功能特点
 

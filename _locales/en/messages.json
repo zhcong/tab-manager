@@ -106,5 +106,21 @@
   "clear_all": {
     "message": "Clear all",
     "description": "Clear all button"
+  },
+  "new_window": {
+    "message": "New Group",
+    "description": "New window button tooltip"
+  },
+  "new_window_dialog_title": {
+    "message": "New Group",
+    "description": "New window dialog title"
+  },
+  "new_group_placeholder": {
+    "message": "Group name",
+    "description": "Group name input placeholder"
+  },
+  "confirm": {
+    "message": "Confirm",
+    "description": "Confirm button"
   }
 }

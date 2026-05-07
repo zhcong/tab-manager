@@ -98,5 +98,21 @@
   "clear_all": {
     "message": "모두 지우기",
     "description": "Clear all button"
+  },
+  "new_window": {
+    "message": "새 그룹",
+    "description": "New window button tooltip"
+  },
+  "new_window_dialog_title": {
+    "message": "새 그룹",
+    "description": "New window dialog title"
+  },
+  "new_group_placeholder": {
+    "message": "그룹 이름",
+    "description": "Group name input placeholder"
+  },
+  "confirm": {
+    "message": "확인",
+    "description": "Confirm button"
   }
 }
