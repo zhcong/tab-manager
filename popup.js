@@ -286,7 +286,7 @@ function render() {
     const closedMsg = chrome.i18n.getMessage('closed') || '已关闭';
 
     return `
-      <div class="group expanded" data-key="${g.key}" style="border-left: 3px solid ${groupColor}; background: ${groupColor}08"></div>
+      <div class="group expanded" data-key="${g.key}" style="border-left: 3px solid ${groupColor}; background-color: ${groupColor}10">
         <div class="group-header">
           <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
