@@ -201,20 +201,23 @@ body.window-mode .list {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
   flex-shrink: 0;
   color: var(--text3);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.chevron {
+  transition: transform 0.2s ease;
   transform-box: fill-box;
   transform-origin: center;
 }
 
 .group.expanded .chevron {
   transform: rotate(90deg);
-  display: inline-block;
 }
 
 .chevron {
-  transition: transform 0.2s ease;
   line-height: 1;
 }
 
