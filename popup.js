@@ -292,7 +292,7 @@ function render() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l10 7-10 7"/></svg>
           </span>
           <span class="window-indicator" style="${windowColors[String(g.key)] ? 'background-color:' + windowColors[String(g.key)] : ''}"></span>
-          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}">${escapeHtml(label)}</span>
+          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}" style="${windowColors[String(g.key)] ? 'background:' + windowColors[String(g.key)] + '20' : ''}">${escapeHtml(label)}</span>
           ${isClosed ? `<span class="closed-win-badge">${closedMsg}</span>` : ''}
           <span class="window-count">${g.records.length}</span>
           ${focusBtn}
