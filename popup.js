@@ -263,11 +263,14 @@ function render() {
 
   const sortedGroups = getSortedGroups(groups);
 
-  listEl.innerHTML = sortedGroups.map(g => {
+  const colorPresets = ['#6366f1', '#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#ec4899', '#f97316', '#84cc16', '#14b8a6', '#3b82f6', '#a855f7'];
+
+  listEl.innerHTML = sortedGroups.map((g, idx) => {
     const isClosed = closedWindowIds.includes(Number(g.key));
     const hasValidWindow = Number(g.key) > 0;
     const defaultLabel = getGroupLabel(g.records);
     const label = windowNames[String(g.key)] || defaultLabel;
+    const groupColor = windowColors[String(g.key)] || colorPresets[idx % colorPresets.length];
     const itemsHtml = g.records.map(r => renderItem(r)).join('');
     const focusBtn = (!isClosed && hasValidWindow)
       ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
@@ -283,7 +286,7 @@ function render() {
     const closedMsg = chrome.i18n.getMessage('closed') || '已关闭';
 
     return `
-      <div class="group expanded" data-key="${g.key}">
+      <div class="group expanded" data-key="${g.key}" style="border-left: 3px solid ${groupColor}; background: ${groupColor}08"></div>
         <div class="group-header">
           <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
@@ -291,8 +294,8 @@ function render() {
           <span class="chevron" data-i18n-title="toggle_collapse">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l10 7-10 7"/></svg>
           </span>
-          <span class="window-indicator" style="${windowColors[String(g.key)] ? 'background-color:' + windowColors[String(g.key)] : ''}"></span>
-          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}" style="${windowColors[String(g.key)] ? 'background:' + windowColors[String(g.key)] + '20' : ''}">${escapeHtml(label)}</span>
+          <span class="window-indicator" style="background-color:${groupColor}"></span>
+          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}">${escapeHtml(label)}</span>
           ${isClosed ? `<span class="closed-win-badge">${closedMsg}</span>` : ''}
           <span class="window-count">${g.records.length}</span>
           ${focusBtn}
