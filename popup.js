@@ -315,7 +315,8 @@ function render() {
     const defaultLabel = getGroupLabel(g.records);
     const label = windowNames[String(g.key)] || defaultLabel;
     const groupColor = windowColors[String(g.key)] || colorPresets[idx % colorPresets.length];
-    const itemsHtml = g.records.map(r => renderItem(r)).join('');
+    const sortedRecords = [...g.records].sort((a, b) => (a.tabIndex || 0) - (b.tabIndex || 0));
+    const itemsHtml = sortedRecords.map(r => renderItem(r)).join('');
     const focusBtn = (!isClosed && hasValidWindow)
       ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
       : '';

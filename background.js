@@ -91,7 +91,8 @@ chrome.runtime.onStartup.addListener(async () => {
       title: tab.title || tab.url,
       favIconUrl: tab.favIconUrl || '',
       openedAt: Date.now(),
-      windowId: tab.windowId
+      windowId: tab.windowId,
+      tabIndex: tab.index
     });
   }
 
@@ -122,7 +123,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       url: tab.url,
       title: tab.title || tab.url,
       favIconUrl: tab.favIconUrl || '',
-      windowId: tab.windowId
+      windowId: tab.windowId,
+      tabIndex: tab.index
     });
   }
 });
@@ -178,7 +180,8 @@ async function upsertRecord(id, data) {
       url: data.url,
       title: data.title,
       favIconUrl: data.favIconUrl,
-      windowId: data.windowId
+      windowId: data.windowId,
+      tabIndex: data.tabIndex
     });
   } else {
     history.push({
@@ -187,7 +190,8 @@ async function upsertRecord(id, data) {
       title: data.title,
       favIconUrl: data.favIconUrl || '',
       openedAt: Date.now(),
-      windowId: data.windowId
+      windowId: data.windowId,
+      tabIndex: data.tabIndex
     });
     while (history.length > MAX_HISTORY) history.shift();
   }
