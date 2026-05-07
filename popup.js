@@ -22,6 +22,7 @@ let pendingRefresh = false;
 let isWindowMode = false;
 let windowOrder = [];
 let windowColors = {};
+let collapsedWindows = [];
 
 searchEl.addEventListener('input', render);
 
@@ -155,12 +156,13 @@ async function load() {
     document.body.classList.add('window-mode');
   }
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors']);
+  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors', 'collapsedWindows']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
   windowOrder = result.windowOrder || [];
   windowColors = result.windowColors || {};
+  collapsedWindows = result.collapsedWindows || [];
 
   // 初次安装时加载当前所有标签页
   if (allRecords.length === 0) {
@@ -221,12 +223,13 @@ async function smartRefresh() {
     expandedStates.set(g.dataset.key, g.classList.contains('expanded'));
   });
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors']);
+  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors', 'collapsedWindows']);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
   windowOrder = result.windowOrder || [];
   windowColors = result.windowColors || {};
+  collapsedWindows = result.collapsedWindows || [];
 
   if (searchText) {
     searchEl.value = searchText;
@@ -315,7 +318,7 @@ function render() {
     const defaultLabel = getGroupLabel(g.records);
     const label = windowNames[String(g.key)] || defaultLabel;
     const groupColor = windowColors[String(g.key)] || colorPresets[idx % colorPresets.length];
-    const sortedRecords = [...g.records].sort((a, b) => (b.tabIndex || 0) - (a.tabIndex || 0));
+    const sortedRecords = [...g.records].sort((a, b) => (a.tabIndex || 0) - (b.tabIndex || 0));
     const itemsHtml = sortedRecords.map(r => renderItem(r)).join('');
     const focusBtn = (!isClosed && hasValidWindow)
       ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
@@ -330,8 +333,9 @@ function render() {
 
     const closedMsg = chrome.i18n.getMessage('closed') || '已关闭';
 
+    const collapsed = collapsedWindows.includes(Number(g.key));
     return `
-      <div class="group expanded" data-key="${g.key}">
+      <div class="group${collapsed ? '' : ' expanded'}" data-key="${g.key}">
         <div class="group-header" style="background:${groupColor}10">
           <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
@@ -354,9 +358,18 @@ function render() {
 
   // 组折叠
   listEl.querySelectorAll('.group-header').forEach(header => {
-    header.addEventListener('click', (e) => {
+    header.addEventListener('click', async (e) => {
       if (e.target.closest('.open-all-btn') || e.target.closest('.focus-win-btn') || e.target.closest('.window-label') || e.target.closest('.label-input') || e.target.closest('.drag-handle') || e.target.closest('.window-indicator')) return;
-      header.parentElement.classList.toggle('expanded');
+      const group = header.parentElement;
+      const wid = Number(group.dataset.key);
+      group.classList.toggle('expanded');
+      const isExpanded = group.classList.contains('expanded');
+      if (isExpanded) {
+        collapsedWindows = collapsedWindows.filter(id => id !== wid);
+      } else {
+        if (!collapsedWindows.includes(wid)) collapsedWindows.push(wid);
+      }
+      await chrome.storage.local.set({ collapsedWindows });
     });
   });
 
