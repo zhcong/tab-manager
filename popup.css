@@ -65,13 +65,16 @@ body {
 
 body.window-mode {
   width: 100%;
+  height: 100vh;
   max-height: none;
   border-radius: 0;
+  overflow: hidden;
 }
 
 body.window-mode .list {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 /* --- Toolbar --- */
