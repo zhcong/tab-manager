@@ -213,12 +213,12 @@ body.window-mode .list {
   transform-origin: center;
 }
 
-.group.expanded .chevron {
-  transform: rotate(90deg);
+.chevron svg {
+  display: block;
 }
 
-.chevron {
-  line-height: 1;
+.group.expanded .chevron {
+  transform: rotate(90deg);
 }
 
 .group-header .window-indicator {
