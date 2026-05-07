@@ -170,7 +170,7 @@ async function load() {
 
 function handleStorageChange(changes, namespace) {
   if (namespace !== 'local') return;
-  if (changes.tabHistory || changes.closedWindowIds || changes.windowNames) {
+  if (changes.tabHistory || changes.closedWindowIds || changes.windowNames || changes.windowColors) {
     scheduleRefresh();
   }
 }
