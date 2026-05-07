@@ -135,6 +135,31 @@ async function load() {
   closedWindowIds = result.closedWindowIds || [];
   windowOrder = result.windowOrder || [];
   windowColors = result.windowColors || {};
+
+  // 初次安装时加载当前所有标签页
+  if (allRecords.length === 0) {
+    const tabs = await chrome.tabs.query({});
+    const records = [];
+    const seen = new Set();
+    for (const tab of tabs) {
+      if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) continue;
+      if (seen.has(tab.url)) continue;
+      seen.add(tab.url);
+      records.push({
+        id: `tab-${tab.id}`,
+        url: tab.url,
+        title: tab.title || tab.url,
+        favIconUrl: tab.favIconUrl || '',
+        openedAt: Date.now(),
+        windowId: tab.windowId
+      });
+    }
+    if (records.length > 0) {
+      allRecords = records.sort((a, b) => b.openedAt - a.openedAt);
+      await chrome.storage.local.set({ tabHistory: allRecords });
+    }
+  }
+
   render();
   applyI18n();
 
