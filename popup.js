@@ -261,13 +261,6 @@ function render() {
     groups.get(wid).push(r);
   });
 
-  // 清理过期的 windowOrder 和 windowColors
-  const existingKeys = new Set([...groups.keys()].map(String));
-  windowOrder = windowOrder.filter(id => existingKeys.has(String(id)));
-  windowColors = Object.fromEntries(
-    Object.entries(windowColors).filter(([key]) => existingKeys.has(key))
-  );
-
   countEl.textContent = filtered.length;
   const winMsg = chrome.i18n.getMessage('window');
   const winPluralMsg = chrome.i18n.getMessage('window_plural');
