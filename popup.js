@@ -507,11 +507,16 @@ function render() {
     }
   });
 
-  // 删除单条
+  // 删除单条（关闭标签页）
   listEl.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      deleteRecord(btn.dataset.id);
+      const tabId = Number(btn.dataset.id.replace('tab-', ''));
+      try {
+        await chrome.tabs.remove(tabId);
+      } catch {
+        deleteRecord(btn.dataset.id);
+      }
     });
   });
 
