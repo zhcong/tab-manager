@@ -19,6 +19,12 @@
       </svg>
       <input type="text" id="search" data-i18n="search" placeholder="">
     </div>
+    <button class="icon-btn" id="newWindowBtn" data-i18n-title="new_window">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+      </svg>
+    </button>
     <button class="icon-btn" id="settingsBtn" data-i18n-title="settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/>
@@ -45,6 +51,25 @@
     </div>
     <div class="footer-actions">
       <button id="clearClosedBtn" data-i18n="clear_closed"></button>
+    </div>
+  </div>
+
+  <!-- 新建窗口弹窗 -->
+  <div id="newWindowDialog" class="dialog-overlay" style="display:none">
+    <div class="dialog">
+      <div class="dialog-header">
+        <span data-i18n="new_window_dialog_title">新建分组</span>
+        <button class="dialog-close" id="dialogCloseBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <input type="text" id="groupNameInput" class="dialog-input" value="新分组" data-i18n-placeholder="new_group_placeholder">
+      </div>
+      <div class="dialog-footer">
+        <button id="dialogCancelBtn" class="btn-secondary" data-i18n="cancel">取消</button>
+        <button id="dialogConfirmBtn" class="btn-primary" data-i18n="confirm">确认</button>
+      </div>
     </div>
   </div>
 

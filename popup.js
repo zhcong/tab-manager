@@ -6,6 +6,12 @@ const clearClosedBtn = document.getElementById('clearClosedBtn');
 const toggleAllBtn = document.getElementById('toggleAll');
 const toggleIcon = document.getElementById('toggleIcon');
 const settingsBtn = document.getElementById('settingsBtn');
+const newWindowBtn = document.getElementById('newWindowBtn');
+const newWindowDialog = document.getElementById('newWindowDialog');
+const groupNameInput = document.getElementById('groupNameInput');
+const dialogCloseBtn = document.getElementById('dialogCloseBtn');
+const dialogCancelBtn = document.getElementById('dialogCancelBtn');
+const dialogConfirmBtn = document.getElementById('dialogConfirmBtn');
 
 let allRecords = [];
 let windowNames = {};
@@ -33,6 +39,41 @@ toggleAllBtn.addEventListener('click', () => {
 
 settingsBtn.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();
+});
+
+// 新建窗口弹窗
+newWindowBtn.addEventListener('click', () => {
+  groupNameInput.value = '新分组';
+  newWindowDialog.style.display = 'flex';
+  groupNameInput.focus();
+  groupNameInput.select();
+});
+
+function closeDialog() {
+  newWindowDialog.style.display = 'none';
+}
+
+dialogCloseBtn.addEventListener('click', closeDialog);
+dialogCancelBtn.addEventListener('click', closeDialog);
+newWindowDialog.addEventListener('click', (e) => {
+  if (e.target === newWindowDialog) closeDialog();
+});
+
+dialogConfirmBtn.addEventListener('click', async () => {
+  const name = groupNameInput.value.trim() || '新分组';
+  closeDialog();
+  try {
+    const win = await chrome.windows.create({ focused: true });
+    await saveWindowName(String(win.id), name);
+    render();
+  } catch (e) {
+    console.error('Failed to create window:', e);
+  }
+});
+
+groupNameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') dialogConfirmBtn.click();
+  if (e.key === 'Escape') closeDialog();
 });
 
 // 清除已关闭窗口

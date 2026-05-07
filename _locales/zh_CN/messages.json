@@ -114,5 +114,21 @@
   "clear_all": {
     "message": "清除全部",
     "description": "Clear all button"
+  },
+  "new_window": {
+    "message": "新建分组",
+    "description": "New window button tooltip"
+  },
+  "new_window_dialog_title": {
+    "message": "新建分组",
+    "description": "New window dialog title"
+  },
+  "new_group_placeholder": {
+    "message": "分组名称",
+    "description": "Group name input placeholder"
+  },
+  "confirm": {
+    "message": "确认",
+    "description": "Confirm button"
   }
 }
