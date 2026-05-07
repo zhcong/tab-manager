@@ -28,7 +28,7 @@ toggleAllBtn.addEventListener('click', () => {
       g.classList.remove('expanded');
     }
   });
-  toggleIcon.style.transform = isExpanded ? 'rotate(-90deg)' : 'rotate(0deg)';
+  toggleIcon.style.transform = isExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
 });
 
 settingsBtn.addEventListener('click', () => {
