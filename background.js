@@ -134,6 +134,20 @@ chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
   updateWindow(`tab-${tabId}`, attachInfo.newWindowId);
 });
 
+chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
+  chrome.tabs.get(tabId, (tab) => {
+    if (!tab || !tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) return;
+    trackTab(tabId, tab.windowId);
+    upsertRecord(`tab-${tabId}`, {
+      url: tab.url,
+      title: tab.title || tab.url,
+      favIconUrl: tab.favIconUrl || '',
+      windowId: tab.windowId,
+      tabIndex: tab.index
+    });
+  });
+});
+
 // --- Storage 操作 ---
 
 function getHistory() {
