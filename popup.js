@@ -3,7 +3,6 @@ const searchEl = document.getElementById('search');
 const countEl = document.getElementById('count');
 const groupCountEl = document.getElementById('groupCount');
 const clearClosedBtn = document.getElementById('clearClosedBtn');
-const clearAllBtn = document.getElementById('clearAllBtn');
 const toggleAllBtn = document.getElementById('toggleAll');
 const toggleIcon = document.getElementById('toggleIcon');
 const settingsBtn = document.getElementById('settingsBtn');
@@ -61,20 +60,6 @@ clearClosedBtn.addEventListener('click', async () => {
   windowOrder = newOrder;
   windowColors = newColors;
   render();
-});
-
-// 清除全部
-clearAllBtn.addEventListener('click', async () => {
-  const confirmMsg = chrome.i18n.getMessage('confirm_clear_all');
-  if (confirm(confirmMsg)) {
-    await chrome.storage.local.set({ tabHistory: [], windowNames: {}, closedWindowIds: [], windowOrder: [], windowColors: {} });
-    allRecords = [];
-    windowNames = {};
-    closedWindowIds = [];
-    windowOrder = [];
-    windowColors = {};
-    render();
-  }
 });
 
 async function load() {
