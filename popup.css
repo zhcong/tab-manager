@@ -210,6 +210,12 @@ body.window-mode .list {
 
 .group.expanded .chevron {
   transform: rotate(90deg);
+  display: inline-block;
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+  line-height: 1;
 }
 
 .group-header .window-indicator {
