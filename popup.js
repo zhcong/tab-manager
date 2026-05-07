@@ -287,7 +287,7 @@ function render() {
 
     return `
       <div class="group expanded" data-key="${g.key}">
-        <div class="group-header">
+        <div class="group-header" style="background:${groupColor}10">
           <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
           </span>
@@ -295,7 +295,7 @@ function render() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l10 7-10 7"/></svg>
           </span>
           <span class="window-indicator" style="background-color:${groupColor}"></span>
-          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}" style="background:${groupColor}18">${escapeHtml(label)}</span>
+          <span class="window-label" data-key="${g.key}" data-default="${escapeHtml(defaultLabel)}">${escapeHtml(label)}</span>
           ${isClosed ? `<span class="closed-win-badge">${closedMsg}</span>` : ''}
           <span class="window-count">${g.records.length}</span>
           ${focusBtn}
@@ -591,8 +591,8 @@ function render() {
         windowColors[String(groupKey)] = color;
         await chrome.storage.local.set({ windowColors });
         dot.style.backgroundColor = color;
-        const labelEl = group.querySelector('.window-label');
-        if (labelEl) labelEl.style.background = color + '18';
+        const headerEl = group.querySelector('.group-header');
+        if (headerEl) headerEl.style.background = color + '10';
         colorRow.remove();
         if (pendingRefresh) {
           pendingRefresh = false;
