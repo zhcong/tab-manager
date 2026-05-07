@@ -176,7 +176,7 @@ body.window-mode .list {
   margin-bottom: 8px;
   background: var(--surface);
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--text4);
   overflow: hidden;
   transition: box-shadow 0.15s;
 }
