@@ -108,7 +108,7 @@
     "description": "Clear button tooltip"
   },
   "clear_closed": {
-    "message": "清除关闭窗口",
+    "message": "清除已关闭窗口",
     "description": "Clear closed windows button"
   },
   "clear_all": {
