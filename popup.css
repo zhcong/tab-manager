@@ -216,6 +216,7 @@ body.window-mode .list {
   background: #6366f1;
   flex-shrink: 0;
   opacity: 0.8;
+  border: 1.5px solid var(--text4);
 }
 
 .group:nth-child(2) .window-indicator { background: #8b5cf6; }
@@ -226,7 +227,7 @@ body.window-mode .list {
 .group-header .window-label {
   flex: 1;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
