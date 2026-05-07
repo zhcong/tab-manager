@@ -216,7 +216,7 @@ body.window-mode .list {
   background: #6366f1;
   flex-shrink: 0;
   opacity: 0.8;
-  border: 1.5px solid var(--text4);
+  border: 1px solid var(--text4);
 }
 
 .group:nth-child(2) .window-indicator { background: #8b5cf6; }
