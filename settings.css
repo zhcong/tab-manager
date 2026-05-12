@@ -48,7 +48,7 @@ html {
 
 body {
   width: 480px;
-  min-height: 500px;
+  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   color: var(--text);
@@ -56,6 +56,12 @@ body {
   border-radius: 20px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+}
+
+html {
+  background: transparent;
+  height: 100%;
 }
 
 .container {
@@ -288,7 +294,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 16px;
+  padding: 16px 28px 20px;
   flex-shrink: 0;
 }
 
