@@ -238,7 +238,6 @@ html {
   height: 20px;
   background: var(--text4);
   border-radius: 10px;
-  transition: background 0.2s;
   pointer-events: none;
 }
 
@@ -251,15 +250,6 @@ html {
   height: 16px;
   background: #fff;
   border-radius: 50%;
-  transition: transform 0.2s;
-}
-
-.toggle-switch input:checked ~ .toggle-slider {
-  background: var(--accent);
-}
-
-.toggle-switch input:checked ~ .toggle-slider::after {
-  transform: translateX(16px);
 }
 
 .toggle-switch input:focus-visible ~ .toggle-slider {
