@@ -762,3 +762,29 @@ function escapeHtml(str) {
 }
 
 load();
+
+// 每 10s 检查列表中的标签是否仍然打开，关闭则删除记录
+setInterval(async () => {
+  try {
+    const tabs = await chrome.tabs.query({});
+    const openTabIds = new Set(tabs.map(t => t.id));
+
+    // 找出已关闭的标签（记录中有但实际已不存在）
+    const staleIds = allRecords
+      .filter(r => {
+        const tabId = Number(r.id.replace('tab-', ''));
+        return !openTabIds.has(tabId);
+      })
+      .map(r => r.id);
+
+    if (staleIds.length === 0) return;
+
+    const result = await chrome.storage.local.get('tabHistory');
+    const history = (result.tabHistory || []).filter(r => !staleIds.includes(r.id));
+    await chrome.storage.local.set({ tabHistory: history });
+    allRecords = history.sort((a, b) => b.openedAt - a.openedAt);
+    render();
+  } catch (e) {
+    // ignore errors during tab query
+  }
+}, 10000);
