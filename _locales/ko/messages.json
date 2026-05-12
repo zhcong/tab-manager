@@ -114,5 +114,13 @@
   "confirm": {
     "message": "확인",
     "description": "Confirm button"
+  },
+  "keep_closed_groups": {
+    "message": "닫힌 그룹 유지",
+    "description": "Toggle label for keeping closed window records"
+  },
+  "keep_closed_groups_desc": {
+    "message": "비활성화하면 닫힌 창 기록은 유지되지 않고 삭제됩니다",
+    "description": "Description for keep closed groups setting"
   }
 }

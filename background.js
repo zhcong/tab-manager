@@ -163,6 +163,18 @@ function getClosedWindows() {
 }
 
 async function markWindowClosed(windowId) {
+  const result = await chrome.storage.local.get(['keepClosedGroups']);
+  const keepClosed = result.keepClosedGroups !== false;
+
+  if (!keepClosed) {
+    const history = await getHistory();
+    const filtered = history.filter(r => r.windowId !== windowId);
+    if (filtered.length !== history.length) {
+      await setHistory(filtered);
+    }
+    return;
+  }
+
   const ids = await getClosedWindows();
   if (!ids.includes(windowId)) {
     ids.push(windowId);

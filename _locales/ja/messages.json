@@ -114,5 +114,13 @@
   "confirm": {
     "message": "確認",
     "description": "Confirm button"
+  },
+  "keep_closed_groups": {
+    "message": "閉じたグループを保持",
+    "description": "Toggle label for keeping closed window records"
+  },
+  "keep_closed_groups_desc": {
+    "message": "オフにすると、閉じたウィンドウの記録は保持されず削除されます",
+    "description": "Description for keep closed groups setting"
   }
 }

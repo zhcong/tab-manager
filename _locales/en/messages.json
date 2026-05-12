@@ -122,5 +122,13 @@
   "confirm": {
     "message": "Confirm",
     "description": "Confirm button"
+  },
+  "keep_closed_groups": {
+    "message": "Keep closed groups",
+    "description": "Toggle label for keeping closed window records"
+  },
+  "keep_closed_groups_desc": {
+    "message": "When disabled, closed window records are deleted instead of kept",
+    "description": "Description for keep closed groups setting"
   }
 }

@@ -114,5 +114,13 @@
   "confirm": {
     "message": "Bestätigen",
     "description": "Confirm button"
+  },
+  "keep_closed_groups": {
+    "message": "Geschlossene Gruppen behalten",
+    "description": "Toggle label for keeping closed window records"
+  },
+  "keep_closed_groups_desc": {
+    "message": "Wenn deaktiviert, werden geschlossene Fensteraufzeichnungen gelöscht anstatt behalten",
+    "description": "Description for keep closed groups setting"
   }
 }

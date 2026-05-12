@@ -130,5 +130,13 @@
   "confirm": {
     "message": "确认",
     "description": "Confirm button"
+  },
+  "keep_closed_groups": {
+    "message": "保留已关闭分组",
+    "description": "Toggle label for keeping closed window records"
+  },
+  "keep_closed_groups_desc": {
+    "message": "关闭后，已关闭窗口的记录将被删除而非保留",
+    "description": "Description for keep closed groups setting"
   }
 }

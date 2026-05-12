@@ -1,6 +1,7 @@
 const includeEl = document.getElementById('include');
 const excludeEl = document.getElementById('exclude');
 const openInWindowEl = document.getElementById('openInWindow');
+const keepClosedGroupsEl = document.getElementById('keepClosedGroups');
 const saveBtn = document.getElementById('saveBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 
@@ -19,12 +20,13 @@ function applyI18n() {
 
 async function load() {
   applyI18n();
-  const result = await chrome.storage.local.get(['urlIncludeKeywords', 'urlExcludeKeywords', 'openInWindow']);
+  const result = await chrome.storage.local.get(['urlIncludeKeywords', 'urlExcludeKeywords', 'openInWindow', 'keepClosedGroups']);
   const include = result.urlIncludeKeywords || [];
   const exclude = result.urlExcludeKeywords || [];
   includeEl.value = include.join('\n');
   excludeEl.value = exclude.join('\n');
   openInWindowEl.checked = result.openInWindow || false;
+  keepClosedGroupsEl.checked = result.keepClosedGroups !== false;
 }
 
 function parseKeywords(text) {
@@ -39,7 +41,8 @@ saveBtn.addEventListener('click', async () => {
   await chrome.storage.local.set({
     urlIncludeKeywords: include,
     urlExcludeKeywords: exclude,
-    openInWindow: openInWindowEl.checked
+    openInWindow: openInWindowEl.checked,
+    keepClosedGroups: keepClosedGroupsEl.checked
   });
   window.close();
 });
