@@ -21,14 +21,20 @@ setInterval(async () => {
   }
 }, 15000);
 
-// 标签页关闭时：延迟判断是窗口关闭还是单标签关闭
-chrome.tabs.onRemoved.addListener((tabId) => {
-  const windowId = tabWindowMap.get(tabId);
+// 标签页关闭时：优先使用 Chrome 事件里的 windowId / isWindowClosing
+// 避免 service worker 唤醒后内存映射为空，误把窗口关闭当成单标签关闭
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  const windowId = removeInfo?.windowId ?? tabWindowMap.get(tabId);
   tabWindowMap.delete(tabId);
 
   if (windowId == null) {
     // 不知道属于哪个窗口，直接删除
     removeRecord(`tab-${tabId}`);
+    return;
+  }
+
+  if (removeInfo?.isWindowClosing) {
+    markWindowClosed(windowId);
     return;
   }
 

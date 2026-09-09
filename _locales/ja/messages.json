@@ -35,6 +35,14 @@
     "message": "保存",
     "description": "Save button"
   },
+  "open_in_window": {
+    "message": "別ウィンドウで開く",
+    "description": "Toggle label for open in window mode"
+  },
+  "open_in_window_desc": {
+    "message": "有効にすると、拡張機能アイコンをクリックしたときに履歴を別ウィンドウで表示します",
+    "description": "Description for open in window setting"
+  },
   "cancel": {
     "message": "キャンセル",
     "description": "Cancel button"
@@ -91,6 +99,10 @@
     "message": "ウィンドウにフォーカス",
     "description": "Focus window button tooltip"
   },
+  "drag_to_reorder": {
+    "message": "ドラッグして並べ替え",
+    "description": "Drag handle tooltip"
+  },
   "clear_closed": {
     "message": "閉じたウィンドウをクリア",
     "description": "Clear closed windows button"
@@ -122,5 +134,109 @@
   "keep_closed_groups_desc": {
     "message": "オフにすると、閉じたウィンドウの記録は保持されず削除されます",
     "description": "Description for keep closed groups setting"
+  },
+  "settings_desc": {
+    "message": "タブ保存ルール、ウィンドウ表示、スマート命名を管理します",
+    "description": "Settings page description"
+  },
+  "url_filter_title": {
+    "message": "URL フィルター",
+    "description": "URL filter section title"
+  },
+  "local_ai_title": {
+    "message": "ローカルAIモデル機能",
+    "description": "Local AI section title"
+  },
+  "local_ai_desc": {
+    "message": "AI 命名、スマート検索、タブ整理ヒントをまとめて管理します",
+    "description": "Local AI section description"
+  },
+  "local_model_naming": {
+    "message": "AI グループ命名",
+    "description": "Toggle label for local model naming"
+  },
+  "local_model_naming_desc": {
+    "message": "有効にするとポップアップに AI 命名ボタンが表示されます。ブラウザのローカルモデルのみを呼び出します",
+    "description": "Description for local model naming"
+  },
+  "auto_name_all": {
+    "message": "すべてのグループを自動命名",
+    "description": "Auto name all groups button tooltip"
+  },
+  "ai_name_group": {
+    "message": "ローカルモデルでこのグループを命名",
+    "description": "AI name group button tooltip"
+  },
+  "regenerate_group_name": {
+    "message": "AI でこのグループ名を再生成",
+    "description": "Regenerate group name button tooltip"
+  },
+  "duplicate_tab": {
+    "message": "重複",
+    "description": "Duplicate tab badge"
+  },
+  "suggest_close": {
+    "message": "閉じる候補",
+    "description": "Suggested close tab badge"
+  },
+  "local_model_unavailable": {
+    "message": "Chrome のローカルモデルが利用できません。ブラウザで有効にしてから再試行してください",
+    "description": "Local model unavailable toast"
+  },
+  "ai_duplicate_detection": {
+    "message": "重複タブのマーク",
+    "description": "Toggle label for duplicate tab detection"
+  },
+  "ai_duplicate_detection_desc": {
+    "message": "正規化した URL に基づいて重複タブを判定し、特別な色でマークします",
+    "description": "Description for duplicate tab detection"
+  },
+  "ai_close_suggestions": {
+    "message": "閉じる候補のマーク",
+    "description": "Toggle label for close suggestions"
+  },
+  "ai_close_suggestions_desc": {
+    "message": "重複項目や重要度の低い検索ページをマークしますが、自動で閉じることはありません",
+    "description": "Description for close suggestions"
+  },
+  "ai_smart_search": {
+    "message": "スマート検索強化",
+    "description": "Toggle label for smart search"
+  },
+  "ai_smart_search_desc": {
+    "message": "検索時にタイトル、URL、ドメイン、略語、よく使う意図語を照合します",
+    "description": "Description for smart search"
+  },
+  "management_title": {
+    "message": "管理",
+    "description": "Management section title"
+  },
+  "management_desc": {
+    "message": "開き方や閉じたグループの保持など基本動作を管理します",
+    "description": "Management section description"
+  },
+  "ai_semantic_search": {
+    "message": "AI セマンティック検索",
+    "description": "Toggle label for AI semantic search"
+  },
+  "ai_semantic_search_desc": {
+    "message": "通常検索の結果を先に表示し、その後ローカル AI モデルで意味的に関連するタブを追加します",
+    "description": "Description for AI semantic search"
+  },
+  "ai_match": {
+    "message": "AI 一致",
+    "description": "AI matched tab badge"
+  },
+  "ai_searching": {
+    "message": "ローカル AI が意味検索結果を追加しています...",
+    "description": "AI search loading status"
+  },
+  "ai_search_added": {
+    "message": "$1 件の AI 一致結果を追加しました",
+    "description": "AI search added status"
+  },
+  "ai_search_unavailable": {
+    "message": "ローカル AI 検索を利用できません。通常検索結果を表示しています",
+    "description": "AI search unavailable status"
   }
 }

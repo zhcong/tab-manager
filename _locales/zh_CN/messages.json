@@ -103,6 +103,10 @@
     "message": "定位到该窗口",
     "description": "Focus window button tooltip"
   },
+  "drag_to_reorder": {
+    "message": "拖拽调整排序",
+    "description": "Drag handle tooltip"
+  },
   "clear": {
     "message": "清除",
     "description": "Clear button tooltip"
@@ -138,5 +142,109 @@
   "keep_closed_groups_desc": {
     "message": "关闭后，已关闭窗口的记录将被删除而非保留",
     "description": "Description for keep closed groups setting"
+  },
+  "settings_desc": {
+    "message": "管理标签页保存规则、窗口展示方式和智能命名能力",
+    "description": "Settings page description"
+  },
+  "url_filter_title": {
+    "message": "URL 过滤",
+    "description": "URL filter section title"
+  },
+  "management_title": {
+    "message": "管理",
+    "description": "Management section title"
+  },
+  "management_desc": {
+    "message": "管理扩展打开方式、窗口分组保留等基础行为",
+    "description": "Management section description"
+  },
+  "local_ai_title": {
+    "message": "本地AI模型功能",
+    "description": "Local AI naming section title"
+  },
+  "local_ai_desc": {
+    "message": "集中管理 AI 命名、智能搜索和标签页整理提示等能力",
+    "description": "Local AI naming description"
+  },
+  "local_model_naming": {
+    "message": "AI 分组命名",
+    "description": "Toggle label for local model naming"
+  },
+  "local_model_naming_desc": {
+    "message": "开启后，弹窗中会显示 AI 命名按钮；仅调用浏览器本地模型，不会主动上传标签页标题",
+    "description": "Description for local model naming"
+  },
+  "auto_name_all": {
+    "message": "自动命名全部分组",
+    "description": "Auto name all groups button tooltip"
+  },
+  "ai_name_group": {
+    "message": "用本地模型命名该分组",
+    "description": "AI name group button tooltip"
+  },
+  "regenerate_group_name": {
+    "message": "重新 AI 生成该分组名称",
+    "description": "Regenerate group name button tooltip"
+  },
+  "duplicate_tab": {
+    "message": "重复",
+    "description": "Duplicate tab badge"
+  },
+  "suggest_close": {
+    "message": "建议关闭",
+    "description": "Suggested close tab badge"
+  },
+  "ai_duplicate_detection": {
+    "message": "重复标签标记",
+    "description": "Toggle label for duplicate tab detection"
+  },
+  "ai_duplicate_detection_desc": {
+    "message": "根据清洗后的 URL 判断重复标签，并用特殊颜色标记",
+    "description": "Description for duplicate tab detection"
+  },
+  "ai_close_suggestions": {
+    "message": "建议关闭标记",
+    "description": "Toggle label for close suggestions"
+  },
+  "ai_close_suggestions_desc": {
+    "message": "标记重复项和低价值搜索页，但不会自动关闭任何标签页",
+    "description": "Description for close suggestions"
+  },
+  "ai_smart_search": {
+    "message": "智能搜索增强",
+    "description": "Toggle label for smart search"
+  },
+  "ai_smart_search_desc": {
+    "message": "搜索时匹配标题、URL、域名、缩写和常见意图词",
+    "description": "Description for smart search"
+  },
+  "ai_semantic_search": {
+    "message": "AI 语义搜索",
+    "description": "Toggle label for AI semantic search"
+  },
+  "ai_semantic_search_desc": {
+    "message": "普通搜索先展示结果，再异步调用本地 AI 模型补充语义相关标签页",
+    "description": "Description for AI semantic search"
+  },
+  "ai_match": {
+    "message": "AI 匹配",
+    "description": "AI matched tab badge"
+  },
+  "ai_searching": {
+    "message": "本地 AI 正在补充语义结果...",
+    "description": "AI search loading status"
+  },
+  "ai_search_added": {
+    "message": "已补充 $1 个 AI 匹配结果",
+    "description": "AI search added status"
+  },
+  "ai_search_unavailable": {
+    "message": "本地 AI 搜索不可用，已使用普通搜索结果",
+    "description": "AI search unavailable status"
+  },
+  "local_model_unavailable": {
+    "message": "当前 Chrome 本地模型不可用，请先在浏览器中开启后再试",
+    "description": "Local model unavailable toast"
   }
 }

@@ -9,37 +9,43 @@ html {
 }
 
 :root {
-  --bg: #f8fafc;
-  --surface: #fff;
-  --border: #f1f5f9;
+  --bg: #eef2ff;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --border: rgba(148, 163, 184, 0.2);
   --text: #1e293b;
   --text2: #475569;
   --text3: #94a3b8;
   --text4: #cbd5e1;
-  --hover: #f8faff;
-  --input-bg: #f1f5f9;
-  --accent: #6366f1;
-  --accent-light: #eef2ff;
-  --accent-hover: #e0e7ff;
+  --hover: rgba(124, 58, 237, 0.06);
+  --input-bg: rgba(241, 245, 249, 0.9);
+  --accent: #7c3aed;
+  --accent-2: #06b6d4;
+  --accent-light: #f3e8ff;
+  --accent-hover: #ede9fe;
   --danger: #ef4444;
   --danger-light: #fef2f2;
   --danger-border: #fecaca;
+  --shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
+  --soft-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1117;
-    --surface: #1a1b23;
-    --border: #2a2b35;
+    --bg: #080b14;
+    --surface: rgba(26, 27, 35, 0.92);
+    --surface-strong: #1a1b23;
+    --border: rgba(148, 163, 184, 0.14);
     --text: #e4e4e7;
     --text2: #a1a1aa;
     --text3: #71717a;
     --text4: #52525b;
-    --hover: #22232d;
-    --input-bg: #22232d;
-    --accent: #818cf8;
-    --accent-light: #1e1b4b;
-    --accent-hover: #312e81;
+    --hover: rgba(129, 140, 248, 0.1);
+    --input-bg: rgba(34, 35, 45, 0.88);
+    --accent: #a78bfa;
+    --accent-2: #22d3ee;
+    --accent-light: rgba(124, 58, 237, 0.18);
+    --accent-hover: rgba(124, 58, 237, 0.28);
     --danger: #f87171;
     --danger-light: #1c1017;
     --danger-border: #4c1d2b;
@@ -47,12 +53,15 @@ html {
 }
 
 body {
-  width: 480px;
+  width: 580px;
   min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 12% -12%, rgba(124, 58, 237, 0.25), transparent 32%),
+    radial-gradient(circle at 92% 0%, rgba(6, 182, 212, 0.18), transparent 30%),
+    var(--bg);
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -65,8 +74,8 @@ html {
 
 .container {
   width: 100%;
-  padding: 24px 28px;
-  max-height: 80vh;
+  padding: 32px 34px 20px;
+  max-height: 86vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -83,21 +92,31 @@ html {
 }
 
 .header {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .header h1 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 750;
   color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text3);
 }
 
 .section {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 18px;
+  padding: 18px;
   margin-bottom: 16px;
+  box-shadow: var(--soft-shadow);
+  backdrop-filter: blur(18px);
 }
 
 .section-title {
@@ -105,23 +124,32 @@ html {
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 750;
   color: var(--text);
   margin-bottom: 6px;
 }
 
-.section-title svg {
+.section-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.14), rgba(6, 182, 212, 0.12));
   color: var(--accent);
+  font-size: 13px;
 }
 
 .desc {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--text3);
   margin-bottom: 16px;
+  line-height: 1.55;
 }
 
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .field:last-child {
@@ -131,7 +159,7 @@ html {
 .field label {
   display: block;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 650;
   color: var(--text2);
   margin-bottom: 6px;
 }
@@ -141,7 +169,7 @@ html {
   min-height: 80px;
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--input-bg);
   color: var(--text);
   font-family: inherit;
@@ -153,7 +181,8 @@ html {
 
 .field textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+  background: var(--surface-strong);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
 }
 
 .field textarea::placeholder {
@@ -171,25 +200,27 @@ html {
   flex: 1;
   padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--accent);
   color: #fff;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.24);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
   flex: 1;
   padding: 8px 16px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
   color: var(--text2);
   font-size: 13px;
   font-weight: 500;
@@ -209,13 +240,13 @@ html {
   cursor: pointer;
   user-select: none;
   gap: 12px;
-  min-height: 28px;
+  min-height: 32px;
 }
 
 .toggle-switch {
   position: relative;
-  width: 36px;
-  height: 20px;
+  width: 42px;
+  height: 24px;
   flex-shrink: 0;
 }
 
@@ -233,10 +264,10 @@ html {
   position: absolute;
   top: 0;
   left: 0;
-  width: 36px;
-  height: 20px;
+  width: 42px;
+  height: 24px;
   background: var(--text4);
-  border-radius: 10px;
+  border-radius: 999px;
   pointer-events: none;
 }
 
@@ -245,8 +276,8 @@ html {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   background: #fff;
   border-radius: 50%;
 }
@@ -267,7 +298,7 @@ html {
 .github-link {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .github-link a {
@@ -292,7 +323,7 @@ html {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 28px 20px;
+  padding: 0 34px 28px;
   flex-shrink: 0;
 }
 

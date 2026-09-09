@@ -1,5 +1,6 @@
 const listEl = document.getElementById('list');
 const searchEl = document.getElementById('search');
+const searchStatusEl = document.getElementById('searchStatus');
 const countEl = document.getElementById('count');
 const groupCountEl = document.getElementById('groupCount');
 const clearClosedBtn = document.getElementById('clearClosedBtn');
@@ -7,6 +8,7 @@ const toggleAllBtn = document.getElementById('toggleAll');
 const toggleIcon = document.getElementById('toggleIcon');
 const settingsBtn = document.getElementById('settingsBtn');
 const newWindowBtn = document.getElementById('newWindowBtn');
+const autoNameBtn = document.getElementById('autoNameBtn');
 const newWindowDialog = document.getElementById('newWindowDialog');
 const groupNameInput = document.getElementById('groupNameInput');
 const dialogCloseBtn = document.getElementById('dialogCloseBtn');
@@ -23,8 +25,25 @@ let isWindowMode = false;
 let windowOrder = [];
 let windowColors = {};
 let collapsedWindows = [];
+let localModelNaming = false;
+let aiDuplicateDetection = true;
+let aiCloseSuggestions = true;
+let aiSmartSearch = true;
+let aiSemanticSearch = false;
+let aiSearchResults = new Map();
+let aiSearchLoading = false;
+let aiSearchTimer = null;
+let aiSearchRequestId = 0;
+let aiSearchError = '';
+let namingGroups = new Set();
+let activeChromeWindowId = null;
 
-searchEl.addEventListener('input', render);
+searchEl.addEventListener('input', () => {
+  aiSearchResults = new Map();
+  aiSearchError = '';
+  render();
+  scheduleAiSemanticSearch();
+});
 
 toggleAllBtn.addEventListener('click', () => {
   isExpanded = !isExpanded;
@@ -40,6 +59,19 @@ toggleAllBtn.addEventListener('click', () => {
 
 settingsBtn.addEventListener('click', () => {
   chrome.runtime.openOptionsPage();
+});
+
+autoNameBtn.addEventListener('click', async () => {
+  const groups = getCurrentGroups();
+  if (groups.length === 0) return;
+  autoNameBtn.disabled = true;
+  try {
+    for (const group of groups) {
+      await nameGroupWithLocalModel(group.key, group.records);
+    }
+  } finally {
+    autoNameBtn.disabled = false;
+  }
 });
 
 // 新建窗口弹窗
@@ -156,13 +188,31 @@ async function load() {
     document.body.classList.add('window-mode');
   }
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors', 'collapsedWindows']);
+  const result = await chrome.storage.local.get([
+    'tabHistory',
+    'windowNames',
+    'closedWindowIds',
+    'windowOrder',
+    'windowColors',
+    'collapsedWindows',
+    'localModelNaming',
+    'aiDuplicateDetection',
+    'aiCloseSuggestions',
+    'aiSmartSearch',
+    'aiSemanticSearch'
+  ]);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
   windowOrder = result.windowOrder || [];
   windowColors = result.windowColors || {};
   collapsedWindows = result.collapsedWindows || [];
+  localModelNaming = result.localModelNaming === true;
+  aiDuplicateDetection = result.aiDuplicateDetection !== false;
+  aiCloseSuggestions = result.aiCloseSuggestions !== false;
+  aiSmartSearch = result.aiSmartSearch !== false;
+  aiSemanticSearch = result.aiSemanticSearch === true;
+  await refreshActiveChromeWindow();
 
   // 初次安装时加载当前所有标签页
   if (allRecords.length === 0) {
@@ -193,12 +243,58 @@ async function load() {
 
   if (isWindowMode) {
     chrome.storage.onChanged.addListener(handleStorageChange);
+    if (chrome.windows?.onFocusChanged) {
+      chrome.windows.onFocusChanged.addListener(handleWindowFocusChanged);
+    }
   }
+}
+
+async function refreshActiveChromeWindow() {
+  try {
+    const focusedWindow = await chrome.windows.getLastFocused({ windowTypes: ['normal'] });
+    activeChromeWindowId = focusedWindow?.focused ? focusedWindow.id : null;
+  } catch {
+    activeChromeWindowId = null;
+  }
+}
+
+async function handleWindowFocusChanged(windowId) {
+  if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    activeChromeWindowId = null;
+    render();
+    return;
+  }
+
+  try {
+    const focusedWindow = await chrome.windows.get(windowId);
+    activeChromeWindowId = focusedWindow?.type === 'normal' && focusedWindow.focused ? windowId : null;
+  } catch {
+    activeChromeWindowId = null;
+  }
+  render();
 }
 
 function handleStorageChange(changes, namespace) {
   if (namespace !== 'local') return;
-  if (changes.tabHistory || changes.closedWindowIds || changes.windowNames || changes.windowColors || changes.windowOrder || changes.collapsedWindows) {
+  if (changes.localModelNaming) {
+    localModelNaming = changes.localModelNaming.newValue === true;
+  }
+  if (changes.aiDuplicateDetection) {
+    aiDuplicateDetection = changes.aiDuplicateDetection.newValue !== false;
+  }
+  if (changes.aiCloseSuggestions) {
+    aiCloseSuggestions = changes.aiCloseSuggestions.newValue !== false;
+  }
+  if (changes.aiSmartSearch) {
+    aiSmartSearch = changes.aiSmartSearch.newValue !== false;
+  }
+  if (changes.aiSemanticSearch) {
+    aiSemanticSearch = changes.aiSemanticSearch.newValue === true;
+    aiSearchResults = new Map();
+    aiSearchError = '';
+    scheduleAiSemanticSearch();
+  }
+  if (changes.tabHistory || changes.closedWindowIds || changes.windowNames || changes.windowColors || changes.windowOrder || changes.collapsedWindows || changes.localModelNaming || changes.aiDuplicateDetection || changes.aiCloseSuggestions || changes.aiSmartSearch || changes.aiSemanticSearch) {
     scheduleRefresh();
   }
 }
@@ -223,13 +319,31 @@ async function smartRefresh() {
     expandedStates.set(g.dataset.key, g.classList.contains('expanded'));
   });
 
-  const result = await chrome.storage.local.get(['tabHistory', 'windowNames', 'closedWindowIds', 'windowOrder', 'windowColors', 'collapsedWindows']);
+  const result = await chrome.storage.local.get([
+    'tabHistory',
+    'windowNames',
+    'closedWindowIds',
+    'windowOrder',
+    'windowColors',
+    'collapsedWindows',
+    'localModelNaming',
+    'aiDuplicateDetection',
+    'aiCloseSuggestions',
+    'aiSmartSearch',
+    'aiSemanticSearch'
+  ]);
   allRecords = (result.tabHistory || []).sort((a, b) => b.openedAt - a.openedAt);
   windowNames = result.windowNames || {};
   closedWindowIds = result.closedWindowIds || [];
   windowOrder = result.windowOrder || [];
   windowColors = result.windowColors || {};
   collapsedWindows = result.collapsedWindows || [];
+  localModelNaming = result.localModelNaming === true;
+  aiDuplicateDetection = result.aiDuplicateDetection !== false;
+  aiCloseSuggestions = result.aiCloseSuggestions !== false;
+  aiSmartSearch = result.aiSmartSearch !== false;
+  aiSemanticSearch = result.aiSemanticSearch === true;
+  await refreshActiveChromeWindow();
 
   if (searchText) {
     searchEl.value = searchText;
@@ -256,6 +370,11 @@ function applyI18n() {
     const msg = chrome.i18n.getMessage(key);
     if (msg) el.title = msg;
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    const msg = chrome.i18n.getMessage(key);
+    if (msg) el.placeholder = msg;
+  });
 }
 
 async function deleteRecord(id) {
@@ -268,21 +387,592 @@ async function deleteRecord(id) {
 
 // 保存自定义窗口名
 async function saveWindowName(groupKey, name) {
+  await ensureWindowOrderStable();
   windowNames[String(groupKey)] = name;
-  await chrome.storage.local.set({ windowNames });
+  await chrome.storage.local.set({ windowNames, windowOrder });
 }
 
-function render() {
-  const query = searchEl.value.toLowerCase();
+async function ensureWindowOrderStable() {
+  if (windowOrder.length > 0) return;
+
+  const groups = new Map();
+  allRecords.forEach(record => {
+    const wid = record.windowId != null ? record.windowId : -1;
+    if (!groups.has(wid)) groups.set(wid, []);
+    groups.get(wid).push(record);
+  });
+
+  windowOrder = getSortedGroups(groups).map(group => Number(group.key));
+}
+
+async function nameGroupWithLocalModel(groupKey, records) {
+  const key = String(groupKey);
+  if (!localModelNaming || namingGroups.has(key)) return;
+
+  namingGroups.add(key);
+  render();
+
+  try {
+    const name = await generateGroupName(records);
+    if (name) {
+      await saveWindowName(key, name);
+    }
+  } catch (error) {
+    console.warn('Local model naming failed:', error);
+    showToast(chrome.i18n.getMessage('local_model_unavailable') || 'Local model is unavailable');
+  } finally {
+    namingGroups.delete(key);
+    render();
+  }
+}
+
+async function generateGroupName(records) {
+  const session = await createLocalModelSession('你是一个浏览器标签页分组命名助手，只返回短小、清晰的分组名称。');
+  const language = (chrome.i18n.getUILanguage && chrome.i18n.getUILanguage()) || navigator.language || 'zh-CN';
+  const titles = buildWeightedTitleLines(records);
+
+  const prompt = [
+    `请根据下面这些浏览器标签页标题，为这个标签页分组生成一个简短名称。`,
+    `重复的标题已经合并为一行，并用“出现 N 次”表示。每行都带有权重分，权重越高说明标题越能代表这个分组。请优先参考高权重标题和高出现次数标题，但忽略重复词、站点后缀、任务编号、无意义导航词。`,
+    `要求：使用 ${language}；只输出名称本身；3 到 12 个汉字或 2 到 6 个英文单词；不要解释，不要引号，不要编号。`,
+    '',
+    titles
+  ].join('\n');
+
+  try {
+    const response = await session.prompt(prompt);
+    return cleanModelTitle(response) || getGroupLabel(records);
+  } finally {
+    if (typeof session.destroy === 'function') {
+      session.destroy();
+    }
+  }
+}
+
+function buildWeightedTitleLines(records) {
+  const domainCount = {};
+  const titleTerms = {};
+  records.forEach(r => {
+    const host = extractHost(r.url);
+    domainCount[host] = (domainCount[host] || 0) + 1;
+    getMeaningfulTerms(r.title).forEach(term => {
+      titleTerms[term] = (titleTerms[term] || 0) + 1;
+    });
+  });
+
+  const mergedTitleMap = new Map();
+  records.forEach((record, index) => {
+      const title = normalizeTitle(record.title || extractHost(record.url));
+    if (!title) return;
+      const host = extractHost(record.url);
+      const terms = getMeaningfulTerms(title);
+      const lengthScore = Math.min(Math.max(title.length - 8, 0), 80) / 80;
+      const domainScore = Math.min(domainCount[host] || 1, 6) / 6;
+      const repeatedTermScore = Math.min(terms.filter(term => titleTerms[term] > 1).length, 5) / 5;
+      const specificSignalScore = hasSpecificSignal(title) ? 0.16 : 0;
+      const noisePenalty = getTitleNoisePenalty(title);
+      const positionScore = Math.max(0, 1 - index / Math.max(records.length, 1)) * 0.08;
+    const baseWeight = Math.round((0.32 + lengthScore * 0.22 + domainScore * 0.2 + repeatedTermScore * 0.22 + specificSignalScore + positionScore - noisePenalty) * 100);
+    const normalizedTitleKey = normalizeForSearch(title);
+    const existing = mergedTitleMap.get(normalizedTitleKey);
+
+    if (existing) {
+      existing.count += 1;
+      existing.weight = Math.max(existing.weight, baseWeight);
+      existing.hosts.add(host);
+    } else {
+      mergedTitleMap.set(normalizedTitleKey, {
+        title,
+        weight: baseWeight,
+        count: 1,
+        hosts: new Set([host])
+      });
+    }
+  });
+
+  return [...mergedTitleMap.values()]
+    .map(item => ({
+      ...item,
+      weight: Math.max(10, Math.min(item.weight + Math.min(item.count - 1, 5) * 6, 100))
+    }))
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 18)
+    .map((item, index) => {
+      const countText = item.count > 1 ? `，出现 ${item.count} 次` : '';
+      const hosts = [...item.hosts].slice(0, 3).join(', ');
+      return `${index + 1}. [权重 ${item.weight}${countText}] ${item.title} (${hosts})`;
+    })
+    .join('\n');
+}
+
+function normalizeTitle(title) {
+  return String(title || '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*[-|—–]\s*(Google Chrome|Chrome|飞书|Lark|GitHub|GitLab|Google Search|百度搜索|Bing)$/i, '')
+    .replace(/^\(\d+\)\s*/, '')
+    .trim();
+}
+
+function getMeaningfulTerms(title) {
+  const normalized = normalizeForSearch(title);
+  const rawTerms = normalized.match(/[\u4e00-\u9fa5]{2,}|[a-z0-9][a-z0-9_-]{1,}/g) || [];
+  const stopWords = new Set([
+    'www', 'com', 'http', 'https', 'html', 'page', 'home', 'index',
+    'chrome', 'google', 'search', 'github', 'gitlab', 'lark', 'feishu',
+    '任务', '页面', '搜索', '文档', '首页', '平台'
+  ]);
+  return rawTerms.filter(term => !stopWords.has(term) && term.length > 1);
+}
+
+function hasSpecificSignal(title) {
+  return /(#\d+|[A-Z]+-\d+|\bPR\b|\bMR\b|\bRFC\b|需求|缺陷|修复|方案|设计|项目|任务|审批|会议|代码|发布|bug|fix|feat|docs?)/i.test(title);
+}
+
+function getTitleNoisePenalty(title) {
+  let penalty = 0;
+  if (/^\s*(new tab|新标签页|about:blank)\s*$/i.test(title)) penalty += 0.35;
+  if (/(搜索|search|百度一下|Google Search)$/i.test(title)) penalty += 0.12;
+  if (title.length > 120) penalty += 0.08;
+  return penalty;
+}
+
+async function createLocalModelSession(systemPrompt = '你是一个浏览器标签页助手。') {
+  const languageModel = globalThis.LanguageModel;
+
+  if (languageModel && typeof languageModel.availability === 'function' && typeof languageModel.create === 'function') {
+    const availability = await languageModel.availability();
+    if (availability === 'unavailable') {
+      throw new Error('Chrome local model is unavailable');
+    }
+    try {
+      return await languageModel.create({ systemPrompt });
+    } catch {
+      return await languageModel.create();
+    }
+  }
+
+  const ai = globalThis.ai || (globalThis.chrome && globalThis.chrome.ai);
+  if (ai && ai.languageModel && typeof ai.languageModel.create === 'function') {
+    return ai.languageModel.create();
+  }
+  if (ai && typeof ai.canCreateTextSession === 'function' && typeof ai.createTextSession === 'function') {
+    const canCreate = await ai.canCreateTextSession();
+    if (canCreate === 'no') {
+      throw new Error('Chrome local model text session is unavailable');
+    }
+    return ai.createTextSession();
+  }
+
+  throw new Error('Chrome local model API is not available in this browser');
+}
+
+function cleanModelTitle(value) {
+  if (!value) return '';
+  return String(value)
+    .replace(/^[\s"'“”‘’`*_#-]+|[\s"'“”‘’`*_#-]+$/g, '')
+    .replace(/^(名称|分组名|标题)\s*[:：]\s*/i, '')
+    .split('\n')[0]
+    .trim()
+    .slice(0, 28);
+}
+
+function showToast(message) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 180);
+  }, 2600);
+}
+
+function updateSearchStatus(query, aiAddedCount) {
+  if (!query || !aiSemanticSearch) {
+    searchStatusEl.style.display = 'none';
+    searchStatusEl.textContent = '';
+    searchStatusEl.className = 'search-status';
+    return;
+  }
+
+  searchStatusEl.className = 'search-status';
+  if (aiSearchLoading) {
+    searchStatusEl.style.display = 'flex';
+    searchStatusEl.classList.add('loading');
+    searchStatusEl.textContent = chrome.i18n.getMessage('ai_searching') || 'AI 搜索中...';
+    return;
+  }
+
+  if (aiSearchError) {
+    searchStatusEl.style.display = 'flex';
+    searchStatusEl.classList.add('error');
+    searchStatusEl.textContent = aiSearchError;
+    return;
+  }
+
+  if (aiAddedCount > 0) {
+    searchStatusEl.style.display = 'flex';
+    searchStatusEl.classList.add('ready');
+    const template = chrome.i18n.getMessage('ai_search_added') || '已补充 $1 个 AI 匹配结果';
+    searchStatusEl.textContent = template.replace('$1', String(aiAddedCount));
+    return;
+  }
+
+  searchStatusEl.style.display = 'none';
+  searchStatusEl.textContent = '';
+}
+
+function scheduleAiSemanticSearch() {
+  if (aiSearchTimer) clearTimeout(aiSearchTimer);
+  const query = searchEl.value.trim();
+
+  if (!aiSemanticSearch || query.length < 2) {
+    aiSearchLoading = false;
+    aiSearchResults = new Map();
+    aiSearchError = '';
+    aiSearchRequestId += 1;
+    render();
+    return;
+  }
+
+  const requestId = ++aiSearchRequestId;
+  aiSearchLoading = true;
+  aiSearchError = '';
+  render();
+
+  aiSearchTimer = setTimeout(async () => {
+    try {
+      const results = await runAiSemanticSearch(query);
+      if (requestId !== aiSearchRequestId || query !== searchEl.value.trim()) return;
+      aiSearchResults = results;
+      aiSearchError = '';
+    } catch (error) {
+      if (requestId !== aiSearchRequestId) return;
+      console.warn('AI semantic search failed:', error);
+      aiSearchResults = new Map();
+      aiSearchError = chrome.i18n.getMessage('ai_search_unavailable') || 'AI search unavailable';
+    } finally {
+      if (requestId === aiSearchRequestId) {
+        aiSearchLoading = false;
+        render();
+      }
+    }
+  }, 700);
+}
+
+async function runAiSemanticSearch(query) {
+  const candidates = buildAiSearchCandidates(query);
+  if (candidates.length === 0) return new Map();
+
+  const session = await createLocalModelSession('你是一个浏览器标签页语义搜索助手。你只能从给定候选标签页中选择相关项，并且只返回 JSON。');
+  const candidateText = candidates.map((item, index) => [
+    `${index + 1}. id: ${item.id}`,
+    `title: ${item.title}`,
+    `domain: ${item.domain}`,
+    `path: ${item.path}`
+  ].join('\n')).join('\n\n');
+
+  const prompt = [
+    `用户正在搜索浏览器标签页。请从候选标签页中找出与查询语义相关的项目。`,
+    `查询：${query}`,
+    `要求：只返回 JSON，不要解释。JSON 格式为 {"matches":[{"id":"tab-123","score":0.86,"reason":"简短原因"}]}。`,
+    `score 范围 0 到 1，只返回 score >= 0.55 的项目，最多返回 12 个。id 必须来自候选列表。`,
+    '',
+    `候选标签页：`,
+    candidateText
+  ].join('\n');
+
+  try {
+    const response = await session.prompt(prompt);
+    return parseAiSearchResponse(response, new Set(candidates.map(item => item.id)));
+  } finally {
+    if (typeof session.destroy === 'function') {
+      session.destroy();
+    }
+  }
+}
+
+function buildAiSearchCandidates(query) {
+  const normalMatches = allRecords.filter(record => smartMatchRecord(record, query));
+  const normalIds = new Set(normalMatches.map(record => record.id));
+  const recentFallback = allRecords
+    .filter(record => !normalIds.has(record.id))
+    .slice()
+    .sort((a, b) => b.openedAt - a.openedAt)
+    .slice(0, 50);
+
+  return [...normalMatches.slice(0, 30), ...recentFallback]
+    .slice(0, 60)
+    .map(record => ({
+      id: record.id,
+      title: normalizeTitle(record.title || record.url).slice(0, 120),
+      domain: extractHost(record.url),
+      path: getUrlPath(record.url).slice(0, 120)
+    }));
+}
+
+function parseAiSearchResponse(response, allowedIds) {
+  const jsonText = extractJsonText(response);
+  const data = JSON.parse(jsonText);
+  const matches = Array.isArray(data.matches) ? data.matches : [];
+  const result = new Map();
+
+  matches.forEach(match => {
+    const id = String(match.id || '');
+    const score = Number(match.score);
+    if (!allowedIds.has(id) || Number.isNaN(score) || score < 0.55) return;
+    result.set(id, {
+      score: Math.min(Math.max(score, 0), 1),
+      reason: String(match.reason || '').slice(0, 80)
+    });
+  });
+
+  return result;
+}
+
+function extractJsonText(value) {
+  const text = String(value || '').trim();
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) return fenced[1].trim();
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    return text.slice(start, end + 1);
+  }
+  return text;
+}
+
+function getUrlPath(url) {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.pathname}${parsed.search}` || '/';
+  } catch {
+    return url || '';
+  }
+}
+
+function analyzeTabSignals(records) {
+  const byNormalizedUrl = new Map();
+
+  const signals = new Map();
+  const ensureSignal = id => {
+    if (!signals.has(id)) {
+      signals.set(id, { duplicate: false, closeSuggested: false, reasons: [] });
+    }
+    return signals.get(id);
+  };
+
+  if (aiDuplicateDetection || aiCloseSuggestions) {
+    records.forEach(record => {
+      const urlKey = normalizeUrlForCompare(record.url);
+
+      if (urlKey) {
+        if (!byNormalizedUrl.has(urlKey)) byNormalizedUrl.set(urlKey, []);
+        byNormalizedUrl.get(urlKey).push(record);
+      }
+    });
+  }
+
+  if (aiDuplicateDetection) {
+    byNormalizedUrl.forEach(group => {
+      if (group.length < 2) return;
+      const sorted = [...group].sort((a, b) => b.openedAt - a.openedAt);
+      sorted.slice(1).forEach(record => {
+        const signal = ensureSignal(record.id);
+        signal.duplicate = true;
+        signal.reasons.push(chrome.i18n.getMessage('duplicate_tab') || '重复');
+      });
+    });
+  }
+
+  if (aiCloseSuggestions) {
+    byNormalizedUrl.forEach(group => {
+      if (group.length < 2) return;
+      const sorted = [...group].sort((a, b) => b.openedAt - a.openedAt);
+      sorted.slice(1).forEach(record => {
+        const signal = ensureSignal(record.id);
+        signal.closeSuggested = true;
+        signal.reasons.push(chrome.i18n.getMessage('suggest_close') || '建议关闭');
+      });
+    });
+
+    records.forEach(record => {
+      const signal = ensureSignal(record.id);
+      if (isLowValueTab(record)) {
+        signal.closeSuggested = true;
+        signal.reasons.push(chrome.i18n.getMessage('suggest_close') || '建议关闭');
+      }
+      if (!signal.duplicate && !signal.closeSuggested) {
+        signals.delete(record.id);
+      }
+    });
+  }
+
+  return signals;
+}
+
+function isLowValueTab(record) {
+  const title = normalizeForSearch(record.title);
+  const url = record.url || '';
+  const host = extractHost(url);
+
+  if (/^(new tab|about blank|新标签页|空白页)$/.test(title)) return true;
+  if (/^(google\.[^/]+|bing\.com|baidu\.com|duckduckgo\.com)$/.test(host) && /[?&](q|wd|query)=/.test(url)) return true;
+  if (/(search|results|s\?wd=|\/search\?)/i.test(url) && title.length < 32) return true;
+  return false;
+}
+
+function normalizeUrlForCompare(url) {
+  try {
+    const parsed = new URL(url);
+    parsed.hash = '';
+    [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+      'spm', 'from', 'ref', 'ref_src', 'fbclid', 'gclid'
+    ].forEach(key => parsed.searchParams.delete(key));
+    const searchParams = [...parsed.searchParams.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    const pathname = decodeURIComponent(parsed.pathname).replace(/\/$/, '');
+    return `${parsed.hostname.replace(/^www\./, '')}${pathname}${searchParams ? `?${searchParams}` : ''}`.toLowerCase();
+  } catch {
+    return String(url || '').replace(/\/$/, '').toLowerCase();
+  }
+}
+
+function smartMatchRecord(record, query) {
+  const normalizedQuery = normalizeForSearch(query);
+  if (!normalizedQuery) return true;
+
+  const corpus = buildSearchCorpus(record);
+  if (corpus.includes(normalizedQuery)) return true;
+  if (!aiSmartSearch) return false;
+
+  const queryTerms = expandSearchTerms(normalizedQuery);
+  if (queryTerms.length === 0) return true;
+
+  return queryTerms.every(term =>
+    corpus.includes(term) ||
+    isSubsequence(term, corpus) ||
+    getSearchAliases(term).some(alias => corpus.includes(alias))
+  );
+}
+
+function buildSearchCorpus(record) {
+  const host = extractHost(record.url);
+  const title = normalizeTitle(record.title || '');
+  const parts = [
+    title,
+    record.url,
+    host,
+    host.replace(/\./g, ' '),
+    getAcronym(title),
+    getSearchIntentText(title, record.url)
+  ];
+  return normalizeForSearch(parts.join(' '));
+}
+
+function expandSearchTerms(query) {
+  const terms = query.match(/[\u4e00-\u9fa5]{1,}|[a-z0-9][a-z0-9_-]*/g) || [];
+  return [...new Set(terms.flatMap(term => [term, ...getSearchAliases(term)]))].filter(Boolean);
+}
+
+function getSearchAliases(term) {
+  const aliases = {
+    pr: ['pull request', 'github', 'merge request'],
+    mr: ['merge request', 'gitlab'],
+    代码: ['code', 'github', 'gitlab', 'codem'],
+    文档: ['doc', 'docs', 'docx', 'lark', '飞书'],
+    任务: ['task', 'issue', 'meego', 'codem', 'jira'],
+    bug: ['fix', 'issue', '缺陷', '修复'],
+    修复: ['fix', 'bug', 'issue'],
+    会议: ['meeting', 'minutes', '日程'],
+    搜索: ['search', 'google', 'bing', 'baidu']
+  };
+  return aliases[term] || [];
+}
+
+function getSearchIntentText(title, url) {
+  const text = `${title} ${url}`.toLowerCase();
+  const tags = [];
+  if (/github|gitlab|pull|merge|commit|branch|pr\b|mr\b/.test(text)) tags.push('代码 code pr mr pull request merge request');
+  if (/jira|meego|codem|issue|task|任务|缺陷|需求/.test(text)) tags.push('任务 issue task 项目 project');
+  if (/docs?|docx|wiki|lark|feishu|飞书|文档/.test(text)) tags.push('文档 docs wiki knowledge');
+  if (/meet|calendar|minutes|会议|日程|纪要/.test(text)) tags.push('会议 meeting calendar minutes');
+  if (/search|google|bing|baidu|搜索/.test(text)) tags.push('搜索 search');
+  return tags.join(' ');
+}
+
+function normalizeForSearch(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFKC')
+    .replace(/https?:\/\//g, ' ')
+    .replace(/[^\u4e00-\u9fa5a-z0-9_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getAcronym(value) {
+  return String(value || '')
+    .split(/[\s:/|—–\-_.]+/)
+    .filter(Boolean)
+    .map(word => word[0])
+    .join('')
+    .toLowerCase();
+}
+
+function isSubsequence(needle, haystack) {
+  if (needle.length < 3) return false;
+  let index = 0;
+  for (const char of haystack) {
+    if (char === needle[index]) index += 1;
+    if (index === needle.length) return true;
+  }
+  return false;
+}
+
+function getCurrentGroups() {
+  const query = searchEl.value;
   let filtered = allRecords;
 
   if (query) {
-    filtered = filtered.filter(r =>
-      r.title.toLowerCase().includes(query) ||
-      r.url.toLowerCase().includes(query)
-    );
+    filtered = filtered.filter(r => smartMatchRecord(r, query));
   }
 
+  const groups = new Map();
+  filtered.forEach(r => {
+    const wid = r.windowId != null ? r.windowId : -1;
+    if (!groups.has(wid)) groups.set(wid, []);
+    groups.get(wid).push(r);
+  });
+
+  return getSortedGroups(groups);
+}
+
+function render() {
+  const query = searchEl.value;
+  let filtered = allRecords;
+  let normalMatchedIds = new Set();
+  let aiAddedCount = 0;
+
+  if (query) {
+    const normalFiltered = allRecords.filter(r => smartMatchRecord(r, query));
+    normalMatchedIds = new Set(normalFiltered.map(r => r.id));
+    const aiFiltered = allRecords
+      .filter(r => aiSearchResults.has(r.id) && !normalMatchedIds.has(r.id))
+      .sort((a, b) => (aiSearchResults.get(b.id)?.score || 0) - (aiSearchResults.get(a.id)?.score || 0));
+    aiAddedCount = aiFiltered.length;
+    filtered = [...normalFiltered, ...aiFiltered];
+  }
+
+  const tabSignals = analyzeTabSignals(allRecords);
   const groups = new Map();
   filtered.forEach(r => {
     const wid = r.windowId != null ? r.windowId : -1;
@@ -294,6 +984,8 @@ function render() {
   const winMsg = chrome.i18n.getMessage('window');
   const winPluralMsg = chrome.i18n.getMessage('window_plural');
   groupCountEl.textContent = `${groups.size} ${groups.size === 1 ? winMsg : winPluralMsg}`;
+  autoNameBtn.style.display = localModelNaming && groups.size > 0 ? 'flex' : 'none';
+  updateSearchStatus(query, aiAddedCount);
 
   if (filtered.length === 0) {
     listEl.innerHTML = `
@@ -305,6 +997,7 @@ function render() {
         <p data-i18n="open_new_page_tip">打开新页面后将自动记录</p>
       </div>
     `;
+    applyI18n();
     return;
   }
 
@@ -319,13 +1012,23 @@ function render() {
     const label = windowNames[String(g.key)] || defaultLabel;
     const groupColor = windowColors[String(g.key)] || colorPresets[idx % colorPresets.length];
     const sortedRecords = [...g.records].sort((a, b) => (a.tabIndex || 0) - (b.tabIndex || 0));
-    const itemsHtml = sortedRecords.map(r => renderItem(r)).join('');
+    const isActiveWindow = !isClosed && hasValidWindow && Number(g.key) === activeChromeWindowId;
+    const itemsHtml = sortedRecords.map(r => {
+      const signal = {
+        ...(tabSignals.get(r.id) || {}),
+        aiMatched: query && aiSearchResults.has(r.id)
+      };
+      return renderItem(r, signal);
+    }).join('');
     const focusBtn = (!isClosed && hasValidWindow)
       ? `<button class="focus-win-btn" data-wid="${g.key}" data-i18n-title="focus_window"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C12 22 19 14 19 9a7 7 0 0 0-14 0c0 5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></button>`
       : '';
 
     const openAllBtn = isClosed
       ? `<button class="open-all-btn" data-i18n="open_all">${chrome.i18n.getMessage('open_all') || 'Open All'}</button>`
+      : '';
+    const aiNameBtn = localModelNaming
+      ? `<button class="ai-name-btn" data-key="${g.key}" data-i18n-title="regenerate_group_name">${namingGroups.has(String(g.key)) ? '<span class="mini-spinner"></span>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.2 6.5"/><path d="M3 12A9 9 0 0 1 18.2 5.5"/><path d="M18 2v4h-4"/><path d="M6 22v-4h4"/><path d="M12 7l.9 2.1L15 10l-2.1.9L12 13l-.9-2.1L9 10l2.1-.9L12 7z"/></svg>'}</button>`
       : '';
     const closeWinBtn = (isClosed && hasValidWindow)
       ? `<button class="close-win-btn" data-wid="${g.key}" data-i18n-title="clear"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`
@@ -335,7 +1038,7 @@ function render() {
 
     const collapsed = collapsedWindows.includes(Number(g.key));
     return `
-      <div class="group${collapsed ? '' : ' expanded'}" data-key="${g.key}">
+      <div class="group${collapsed ? '' : ' expanded'}${isActiveWindow ? ' active-window' : ''}" data-key="${g.key}">
         <div class="group-header" style="background:${groupColor}10">
           <span class="drag-handle" draggable="true" data-i18n-title="drag_to_reorder">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
@@ -348,6 +1051,7 @@ function render() {
           ${isClosed ? `<span class="closed-win-badge">${closedMsg}</span>` : ''}
           <span class="window-count">${g.records.length}</span>
           ${focusBtn}
+          ${aiNameBtn}
           ${openAllBtn}
           ${closeWinBtn}
         </div>
@@ -359,7 +1063,7 @@ function render() {
   // 组折叠
   listEl.querySelectorAll('.group-header').forEach(header => {
     header.addEventListener('click', async (e) => {
-      if (e.target.closest('.open-all-btn') || e.target.closest('.focus-win-btn') || e.target.closest('.window-label') || e.target.closest('.label-input') || e.target.closest('.drag-handle') || e.target.closest('.window-indicator')) return;
+      if (e.target.closest('.open-all-btn') || e.target.closest('.focus-win-btn') || e.target.closest('.ai-name-btn') || e.target.closest('.window-label') || e.target.closest('.label-input') || e.target.closest('.drag-handle') || e.target.closest('.window-indicator')) return;
       const group = header.parentElement;
       const wid = Number(group.dataset.key);
       group.classList.toggle('expanded');
@@ -378,6 +1082,17 @@ function render() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       chrome.windows.update(Number(btn.dataset.wid), { focused: true });
+    });
+  });
+
+  // 本地模型命名单个分组
+  listEl.querySelectorAll('.ai-name-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const groupKey = btn.dataset.key;
+      const group = getCurrentGroups().find(g => String(g.key) === String(groupKey));
+      if (!group || namingGroups.has(String(groupKey))) return;
+      await nameGroupWithLocalModel(group.key, group.records);
     });
   });
 
@@ -667,6 +1382,9 @@ function render() {
       header.after(colorRow);
     });
   });
+
+  setupFaviconFallbacks();
+  applyI18n();
 }
 
 function getSortedGroups(groups) {
@@ -684,22 +1402,28 @@ function getSortedGroups(groups) {
   return entries;
 }
 
-function renderItem(r) {
+function renderItem(r, signal) {
   const timeStr = formatTime(r.openedAt);
   const displayHost = extractHost(r.url);
   const firstChar = displayHost.charAt(0).toUpperCase();
+  const signalClasses = [
+    signal?.duplicate ? 'item-duplicate' : '',
+    signal?.closeSuggested ? 'item-close-suggested' : ''
+  ].filter(Boolean).join(' ');
+  const badges = renderSignalBadges(signal);
 
   const iconHtml = r.favIconUrl
-    ? `<img src="${escapeHtml(r.favIconUrl)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" crossorigin="anonymous"><div class="fallback-icon" style="display:none">${firstChar}</div>`
+    ? `<img class="favicon-img" src="${escapeHtml(r.favIconUrl)}" alt="" crossorigin="anonymous"><div class="fallback-icon" style="display:none">${firstChar}</div>`
     : `<div class="fallback-icon">${firstChar}</div>`;
 
   return `
-    <div class="item" data-id="${escapeHtml(r.id)}" data-url="${escapeHtml(r.url)}">
+    <div class="item ${signalClasses}" data-id="${escapeHtml(r.id)}" data-url="${escapeHtml(r.url)}">
       ${iconHtml}
       <div class="info">
         <div class="title"><span class="text-inner">${escapeHtml(r.title)}</span></div>
         <div class="url"><span class="text-inner">${escapeHtml(r.url)}</span></div>
       </div>
+      ${badges}
       <span class="time">${timeStr}</span>
       <button class="delete-btn" data-id="${escapeHtml(r.id)}" data-i18n-title="delete">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -708,6 +1432,35 @@ function renderItem(r) {
       </button>
     </div>
   `;
+}
+
+function renderSignalBadges(signal) {
+  if (!signal) return '';
+  const badges = [];
+  if (signal.aiMatched) {
+    badges.push(`<span class="signal-badge ai-match-badge" data-i18n="ai_match">AI 匹配</span>`);
+  }
+  if (signal.duplicate) {
+    badges.push(`<span class="signal-badge duplicate-badge" data-i18n="duplicate_tab">重复</span>`);
+  } else if (signal.closeSuggested) {
+    badges.push(`<span class="signal-badge close-badge" data-i18n="suggest_close">建议关闭</span>`);
+  }
+  return badges.join('');
+}
+
+function setupFaviconFallbacks() {
+  listEl.querySelectorAll('.favicon-img').forEach(img => {
+    const showFallback = () => {
+      const fallback = img.nextElementSibling;
+      img.remove();
+      if (fallback) fallback.style.display = 'flex';
+    };
+
+    img.addEventListener('error', showFallback, { once: true });
+    if (img.complete && img.naturalWidth === 0) {
+      showFallback();
+    }
+  });
 }
 
 function getGroupLabel(records) {

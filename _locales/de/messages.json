@@ -35,6 +35,14 @@
     "message": "Speichern",
     "description": "Save button"
   },
+  "open_in_window": {
+    "message": "In separatem Fenster öffnen",
+    "description": "Toggle label for open in window mode"
+  },
+  "open_in_window_desc": {
+    "message": "Wenn aktiviert, wird der Verlauf beim Klick auf das Erweiterungssymbol in einem separaten Fenster angezeigt",
+    "description": "Description for open in window setting"
+  },
   "cancel": {
     "message": "Abbrechen",
     "description": "Cancel button"
@@ -91,6 +99,10 @@
     "message": "Fenster fokussieren",
     "description": "Focus window button tooltip"
   },
+  "drag_to_reorder": {
+    "message": "Zum Sortieren ziehen",
+    "description": "Drag handle tooltip"
+  },
   "clear_closed": {
     "message": "Geschlossene Fenster löschen",
     "description": "Clear closed windows button"
@@ -122,5 +134,109 @@
   "keep_closed_groups_desc": {
     "message": "Wenn deaktiviert, werden geschlossene Fensteraufzeichnungen gelöscht anstatt behalten",
     "description": "Description for keep closed groups setting"
+  },
+  "settings_desc": {
+    "message": "Tab-Speicherregeln, Fensteranzeige und smarte Benennung verwalten",
+    "description": "Settings page description"
+  },
+  "url_filter_title": {
+    "message": "URL-Filter",
+    "description": "URL filter section title"
+  },
+  "local_ai_title": {
+    "message": "Lokale AI-Modellfunktionen",
+    "description": "Local AI section title"
+  },
+  "local_ai_desc": {
+    "message": "AI-Benennung, smarte Suche und Hinweise zur Tab-Bereinigung zentral verwalten",
+    "description": "Local AI section description"
+  },
+  "local_model_naming": {
+    "message": "AI-Gruppenbenennung",
+    "description": "Toggle label for local model naming"
+  },
+  "local_model_naming_desc": {
+    "message": "Nach Aktivierung erscheinen AI-Benennungsbuttons im Popup. Es wird nur das lokale Browsermodell verwendet",
+    "description": "Description for local model naming"
+  },
+  "auto_name_all": {
+    "message": "Alle Gruppen automatisch benennen",
+    "description": "Auto name all groups button tooltip"
+  },
+  "ai_name_group": {
+    "message": "Diese Gruppe mit lokalem Modell benennen",
+    "description": "AI name group button tooltip"
+  },
+  "regenerate_group_name": {
+    "message": "Diesen Gruppennamen mit AI neu generieren",
+    "description": "Regenerate group name button tooltip"
+  },
+  "duplicate_tab": {
+    "message": "Duplikat",
+    "description": "Duplicate tab badge"
+  },
+  "suggest_close": {
+    "message": "Schließen?",
+    "description": "Suggested close tab badge"
+  },
+  "local_model_unavailable": {
+    "message": "Das lokale Chrome-Modell ist nicht verfügbar. Bitte im Browser aktivieren und erneut versuchen",
+    "description": "Local model unavailable toast"
+  },
+  "ai_duplicate_detection": {
+    "message": "Doppelte Tabs markieren",
+    "description": "Toggle label for duplicate tab detection"
+  },
+  "ai_duplicate_detection_desc": {
+    "message": "Doppelte Tabs anhand normalisierter URLs erkennen und farblich markieren",
+    "description": "Description for duplicate tab detection"
+  },
+  "ai_close_suggestions": {
+    "message": "Schließvorschläge markieren",
+    "description": "Toggle label for close suggestions"
+  },
+  "ai_close_suggestions_desc": {
+    "message": "Duplikate und wenig wertvolle Suchseiten markieren, aber niemals automatisch Tabs schließen",
+    "description": "Description for close suggestions"
+  },
+  "ai_smart_search": {
+    "message": "Smarte Suche verbessern",
+    "description": "Toggle label for smart search"
+  },
+  "ai_smart_search_desc": {
+    "message": "Beim Suchen Titel, URL, Domain, Akronym und häufige Bedeutungswörter abgleichen",
+    "description": "Description for smart search"
+  },
+  "management_title": {
+    "message": "Verwaltung",
+    "description": "Management section title"
+  },
+  "management_desc": {
+    "message": "Grundverhalten wie Öffnungsmodus und Beibehalten geschlossener Gruppen verwalten",
+    "description": "Management section description"
+  },
+  "ai_semantic_search": {
+    "message": "AI-Semantiksuche",
+    "description": "Toggle label for AI semantic search"
+  },
+  "ai_semantic_search_desc": {
+    "message": "Normale Ergebnisse zuerst anzeigen und dann lokale AI nutzen, um semantisch passende Tabs zu ergänzen",
+    "description": "Description for AI semantic search"
+  },
+  "ai_match": {
+    "message": "AI-Treffer",
+    "description": "AI matched tab badge"
+  },
+  "ai_searching": {
+    "message": "Lokale AI ergänzt semantische Ergebnisse...",
+    "description": "AI search loading status"
+  },
+  "ai_search_added": {
+    "message": "$1 AI-Treffer ergänzt",
+    "description": "AI search added status"
+  },
+  "ai_search_unavailable": {
+    "message": "Lokale AI-Suche ist nicht verfügbar. Normale Suchergebnisse werden angezeigt",
+    "description": "AI search unavailable status"
   }
 }
